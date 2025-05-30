@@ -1,42 +1,86 @@
-name: 🚀 Test Bot Simple
+name: 🚀 Funding Rates Bot Complet
 
 on:
+  schedule:
+    - cron: '0 6,14,22 * * *'  # 3x par jour
   workflow_dispatch:
 
 jobs:
-  test:
+  collect:
     runs-on: ubuntu-latest
     
     steps:
     - name: 📦 Checkout
       uses: actions/checkout@v4
-    
+      
     - name: 🐍 Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
-    - name: 📁 List files
+        
+    - name: 📚 Install dependencies
+      run: pip install requests gspread google-auth
+      
+    - name: 🔑 Setup credentials
+      run: echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+      
+    - name: 🚀 Collect & Save Data
       run: |
-        echo "Fichiers présents:"
-        ls -la
-        echo "Contenu Python:"
-        find . -name "*.py"
-    
-    - name: 📚 Install requests
-      run: pip install requests
-    
-    - name: 🚀 Run simple test
-      run: |
-        echo "Test direct de l'API Binance:"
         python3 -c "
-        import requests
-        print('✅ Requests OK')
-        try:
-            r = requests.get('https://fapi.binance.com/fapi/v1/premiumIndex?symbol=BTCUSDT')
-            data = r.json()
-            rate = float(data['lastFundingRate']) * 100
-            print(f'✅ BTC funding rate: {rate:.4f}%')
-        except Exception as e:
-            print(f'❌ Erreur: {e}')
+        import requests, gspread, time
+        from datetime import datetime
+        from google.oauth2.service_account import Credentials
+        
+        print('🚀 Démarrage collecte funding rates...')
+        
+        # Google Sheets setup
+        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        creds = Credentials.from_service_account_file('credentials.json', scopes=scope)
+        gc = gspread.authorize(creds)
+        sheet = gc.open_by_key('${{ secrets.SHEET_ID }}').worksheet('Funding Rates')
+        print('✅ Google Sheets connecté')
+        
+        # Collecte Binance
+        print('🔄 Collecte Binance...')
+        symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOTUSDT', 'LINKUSDT', 'MATICUSDT']
+        binance_data = requests.get('https://fapi.binance.com/fapi/v1/premiumIndex').json()
+        binance_filtered = [x for x in binance_data if x['symbol'] in symbols]
+        
+        # Collecte KuCoin
+        print('🔄 Collecte KuCoin...')
+        kucoin_symbols = ['XBTUSDTM', 'ETHUSDTM', 'ADAUSDTM', 'SOLUSDTM', 'LINKUSDTM', 'MATICUSDTM']
+        kucoin_data = []
+        for sym in kucoin_symbols:
+            try:
+                r = requests.get(f'https://api-futures.kucoin.com/api/v1/funding-rate/{sym}/current')
+                data = r.json()
+                if data['code'] == '200000':
+                    kucoin_data.append({'symbol': sym, 'rate': data['data']['value'], 'time': data['data']['timePoint']})
+            except:
+                pass
+        
+        # Sauvegarder
+        rows = []
+        timestamp = int(time.time())
+        date_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        for item in binance_filtered:
+            rate = float(item['lastFundingRate']) * 100
+            status = '🔴 LONG PAY' if rate > 0.1 else '🟢 SHORT PAY' if rate < -0.1 else '🟡 NEUTRAL'
+            next_time = datetime.fromtimestamp(int(item['nextFundingTime'])/1000).strftime('%Y-%m-%d %H:%M:%S')
+            rows.append([timestamp, date_str, 'Binance', item['symbol'], round(rate, 4), next_time, status])
+        
+        for item in kucoin_data:
+            rate = float(item['rate']) * 100
+            status = '🔴 LONG PAY' if rate > 0.1 else '🟢 SHORT PAY' if rate < -0.1 else '🟡 NEUTRAL'
+            next_time = datetime.fromtimestamp(int(item['time'])/1000).strftime('%Y-%m-%d %H:%M:%S')
+            symbol = item['symbol'].replace('USDTM', '').replace('XBT', 'BTC') + 'USDT'
+            rows.append([timestamp, date_str, 'KuCoin', symbol, round(rate, 4), next_time, status])
+        
+        if rows:
+            sheet.append_rows(rows)
+            print(f'✅ {len(rows)} lignes ajoutées à Google Sheets')
+            print('🎯 Collecte terminée avec succès!')
+        else:
+            print('❌ Aucune donnée collectée')
         "
