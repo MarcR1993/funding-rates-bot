@@ -2,7 +2,7 @@ name: 🚀 Funding Rates Bot Complet
 
 on:
   schedule:
-    - cron: '0 6,14,22 * * *'  # 3x par jour
+    - cron: '0 6,14,22 * * *'
   workflow_dispatch:
 
 jobs:
@@ -37,50 +37,67 @@ jobs:
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = Credentials.from_service_account_file('credentials.json', scopes=scope)
         gc = gspread.authorize(creds)
-        sheet = gc.open_by_key('${{ secrets.SHEET_ID }}').worksheet('Funding Rates')
+        sheet = gc.open_by_key('${{ secrets.SHEET_ID }}')
+        
+        try:
+            worksheet = sheet.worksheet('Funding Rates')
+        except:
+            worksheet = sheet.add_worksheet(title='Funding Rates', rows='1000', cols='10')
+            worksheet.append_row(['Timestamp', 'Date', 'Exchange', 'Symbol', 'Funding_Rate_%', 'Next_Funding_Time', 'Status'])
+        
         print('✅ Google Sheets connecté')
         
-        # Collecte Binance
-        print('🔄 Collecte Binance...')
-        symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOTUSDT', 'LINKUSDT', 'MATICUSDT']
-        binance_data = requests.get('https://fapi.binance.com/fapi/v1/premiumIndex').json()
-        binance_filtered = [x for x in binance_data if x['symbol'] in symbols]
-        
-        # Collecte KuCoin
-        print('🔄 Collecte KuCoin...')
-        kucoin_symbols = ['XBTUSDTM', 'ETHUSDTM', 'ADAUSDTM', 'SOLUSDTM', 'LINKUSDTM', 'MATICUSDTM']
-        kucoin_data = []
-        for sym in kucoin_symbols:
-            try:
-                r = requests.get(f'https://api-futures.kucoin.com/api/v1/funding-rate/{sym}/current')
-                data = r.json()
-                if data['code'] == '200000':
-                    kucoin_data.append({'symbol': sym, 'rate': data['data']['value'], 'time': data['data']['timePoint']})
-            except:
-                pass
-        
-        # Sauvegarder
+        # Collecte données
         rows = []
         timestamp = int(time.time())
         date_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        for item in binance_filtered:
-            rate = float(item['lastFundingRate']) * 100
-            status = '🔴 LONG PAY' if rate > 0.1 else '🟢 SHORT PAY' if rate < -0.1 else '🟡 NEUTRAL'
-            next_time = datetime.fromtimestamp(int(item['nextFundingTime'])/1000).strftime('%Y-%m-%d %H:%M:%S')
-            rows.append([timestamp, date_str, 'Binance', item['symbol'], round(rate, 4), next_time, status])
+        # Binance
+        print('🔄 Collecte Binance...')
+        try:
+            symbols = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOTUSDT', 'LINKUSDT', 'MATICUSDT']
+            binance_data = requests.get('https://fapi.binance.com/fapi/v1/premiumIndex', timeout=10).json()
+            
+            for item in binance_data:
+                if item.get('symbol') in symbols:
+                    rate = float(item.get('lastFundingRate', 0)) * 100
+                    status = '🔴 LONG PAY' if rate > 0.1 else '🟢 SHORT PAY' if rate < -0.1 else '🟡 NEUTRAL'
+                    next_time = datetime.fromtimestamp(int(item.get('nextFundingTime', 0))/1000).strftime('%Y-%m-%d %H:%M:%S')
+                    rows.append([timestamp, date_str, 'Binance', item['symbol'], round(rate, 4), next_time, status])
+            
+            print(f'✅ Binance: {len([r for r in rows if r[2] == \"Binance\"])} cryptos')
+        except Exception as e:
+            print(f'❌ Erreur Binance: {e}')
         
-        for item in kucoin_data:
-            rate = float(item['rate']) * 100
-            status = '🔴 LONG PAY' if rate > 0.1 else '🟢 SHORT PAY' if rate < -0.1 else '🟡 NEUTRAL'
-            next_time = datetime.fromtimestamp(int(item['time'])/1000).strftime('%Y-%m-%d %H:%M:%S')
-            symbol = item['symbol'].replace('USDTM', '').replace('XBT', 'BTC') + 'USDT'
-            rows.append([timestamp, date_str, 'KuCoin', symbol, round(rate, 4), next_time, status])
+        # KuCoin
+        print('🔄 Collecte KuCoin...')
+        try:
+            kucoin_symbols = ['XBTUSDTM', 'ETHUSDTM', 'ADAUSDTM', 'SOLUSDTM', 'LINKUSDTM', 'MATICUSDTM']
+            for sym in kucoin_symbols:
+                try:
+                    r = requests.get(f'https://api-futures.kucoin.com/api/v1/funding-rate/{sym}/current', timeout=10)
+                    data = r.json()
+                    if data.get('code') == '200000' and 'data' in data:
+                        rate = float(data['data'].get('value', 0)) * 100
+                        status = '🔴 LONG PAY' if rate > 0.1 else '🟢 SHORT PAY' if rate < -0.1 else '🟡 NEUTRAL'
+                        next_time = datetime.fromtimestamp(int(data['data'].get('timePoint', 0))/1000).strftime('%Y-%m-%d %H:%M:%S')
+                        symbol = sym.replace('USDTM', '').replace('XBT', 'BTC') + 'USDT'
+                        rows.append([timestamp, date_str, 'KuCoin', symbol, round(rate, 4), next_time, status])
+                    time.sleep(0.1)
+                except:
+                    continue
+            
+            print(f'✅ KuCoin: {len([r for r in rows if r[2] == \"KuCoin\"])} cryptos')
+        except Exception as e:
+            print(f'❌ Erreur KuCoin: {e}')
         
+        # Sauvegarder
         if rows:
-            sheet.append_rows(rows)
+            worksheet.append_rows(rows)
             print(f'✅ {len(rows)} lignes ajoutées à Google Sheets')
             print('🎯 Collecte terminée avec succès!')
+            for row in rows:
+                print(f'  {row[2]} {row[3]}: {row[4]}%')
         else:
             print('❌ Aucune donnée collectée')
         "
