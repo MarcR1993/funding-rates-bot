@@ -1,0 +1,52 @@
+# .github/workflows/funding-rates.yml
+name: 🚀 Funding Rates Collector
+
+on:
+  # Se déclenche toutes les 8h (6h, 14h, 22h UTC)
+  schedule:
+    - cron: '0 6,14,22 * * *'
+  
+  # Permet de lancer manuellement
+  workflow_dispatch:
+
+jobs:
+  collect-funding-rates:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📦 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: 📚 Install dependencies
+      run: |
+        pip install requests gspread google-auth google-auth-oauthlib
+    
+    - name: 🔑 Setup Google Credentials
+      run: |
+        echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+    
+    - name: ⚙️ Setup Config
+      run: |
+        echo "CREDENTIALS_FILE = 'credentials.json'" > config.py
+        echo "SHEET_ID = '${{ secrets.SHEET_ID }}'" >> config.py
+        echo "COLLECTION_INTERVAL = 480" >> config.py  # 8h en minutes
+        echo "BINANCE_SYMBOLS = ['BTCUSDT', 'ETHUSDT', 'ADAUSDT', 'SOLUSDT', 'DOTUSDT', 'LINKUSDT', 'MATICUSDT']" >> config.py
+        echo "KUCOIN_SYMBOLS = ['XBTUSDTM', 'ETHUSDTM', 'ADAUSDTM', 'SOLUSDTM', 'LINKUSDTM', 'MATICUSDTM']" >> config.py
+        echo "HIGH_FUNDING_THRESHOLD = 0.1" >> config.py
+        echo "LOW_FUNDING_THRESHOLD = -0.1" >> config.py
+        echo "ALERT_HIGH_THRESHOLD = 0.5" >> config.py
+        echo "ALERT_LOW_THRESHOLD = -0.5" >> config.py
+        echo "SHOW_TERMINAL_OUTPUT = True" >> config.py
+    
+    - name: 🔄 Collect Funding Rates
+      run: python funding_rates_collector.py
+    
+    - name: 📊 Log Results
+      run: |
+        echo "✅ Funding rates collected at $(date)"
+        echo "🔗 Check your Google Sheet: https://docs.google.com/spreadsheets/d/${{ secrets.SHEET_ID }}/edit"
