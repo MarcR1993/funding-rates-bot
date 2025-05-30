@@ -44,7 +44,7 @@ jobs:
         echo "SHOW_TERMINAL_OUTPUT = True" >> config.py
     
     - name: 🔄 Collect Funding Rates
-      run: python funding_rates_collector.py
+      run: python test_bot.py
     
     - name: 📊 Log Results
       run: |
