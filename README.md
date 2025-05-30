@@ -1,2 +1,2 @@
-# funding-rates-bot
+# funding-rates-bot 
 🚀 Bot automatique de collecte des funding rates
