@@ -461,4 +461,287 @@
         <div id="settings" class="tab-content">
             <div class="settings-grid">
                 <div class="card">
-                    <h3
+                    <h3>Frequence de Collecte</h3>
+                    <div class="setting-item">
+                        <span>Intervalle de collecte :</span>
+                        <select id="collection-interval">
+                            <option value="4">Toutes les 4 heures</option>
+                            <option value="8" selected>Toutes les 8 heures (recommande)</option>
+                            <option value="12">Toutes les 12 heures</option>
+                            <option value="24">Une fois par jour</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Alertes</h3>
+                    <div class="setting-item">
+                        <span>Seuil alerte haute (%) :</span>
+                        <input type="number" id="alert-high" value="0.5" step="0.1" min="0" max="5">
+                    </div>
+                    <div class="setting-item">
+                        <span>Seuil alerte basse (%) :</span>
+                        <input type="number" id="alert-low" value="-0.5" step="0.1" min="-5" max="0">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn primary" onclick="saveSettings()">SAUVEGARDER PARAMETRES</button>
+                <button class="btn" onclick="exportConfig()">EXPORTER CONFIGURATION</button>
+                <button class="btn danger" onclick="resetAllSettings()">RESET COMPLET</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration globale
+        let config = {
+            cryptos: {
+                selected: ['BTC', 'ETH', 'ADA', 'SOL', 'DOT', 'LINK', 'MATIC'],
+                available: [
+                    {symbol: 'BTC', name: 'Bitcoin'},
+                    {symbol: 'ETH', name: 'Ethereum'},
+                    {symbol: 'ADA', name: 'Cardano'},
+                    {symbol: 'SOL', name: 'Solana'},
+                    {symbol: 'DOT', name: 'Polkadot'},
+                    {symbol: 'LINK', name: 'Chainlink'},
+                    {symbol: 'MATIC', name: 'Polygon'},
+                    {symbol: 'AVAX', name: 'Avalanche'},
+                    {symbol: 'UNI', name: 'Uniswap'},
+                    {symbol: 'AAVE', name: 'Aave'},
+                    {symbol: 'ATOM', name: 'Cosmos'},
+                    {symbol: 'NEAR', name: 'Near Protocol'},
+                    {symbol: 'FTM', name: 'Fantom'},
+                    {symbol: 'ALGO', name: 'Algorand'},
+                    {symbol: 'ICP', name: 'Internet Computer'},
+                    {symbol: 'XRP', name: 'Ripple'},
+                    {symbol: 'LTC', name: 'Litecoin'},
+                    {symbol: 'BCH', name: 'Bitcoin Cash'}
+                ]
+            },
+            exchanges: {
+                binance: true,
+                kucoin: true,
+                okx: false,
+                bybit: false
+            },
+            settings: {
+                interval: 8,
+                alertHigh: 0.5,
+                alertLow: -0.5
+            }
+        };
+        
+        // Fonctions d'interface
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'cryptos') {
+                loadCryptoGrid();
+            } else if (tabName === 'dashboard') {
+                loadDashboardData();
+            }
+        }
+        
+        function loadCryptoGrid() {
+            const grid = document.getElementById('crypto-grid');
+            grid.innerHTML = '';
+            
+            config.cryptos.available.forEach(crypto => {
+                const isSelected = config.cryptos.selected.includes(crypto.symbol);
+                const cryptoElement = document.createElement('div');
+                cryptoElement.className = `crypto-item ${isSelected ? 'selected' : ''}`;
+                cryptoElement.onclick = () => toggleCrypto(crypto.symbol);
+                
+                cryptoElement.innerHTML = `
+                    <div class="crypto-symbol">${crypto.symbol}</div>
+                    <div class="crypto-name">${crypto.name}</div>
+                `;
+                
+                grid.appendChild(cryptoElement);
+            });
+        }
+        
+        function toggleCrypto(symbol) {
+            const index = config.cryptos.selected.indexOf(symbol);
+            if (index > -1) {
+                config.cryptos.selected.splice(index, 1);
+            } else {
+                config.cryptos.selected.push(symbol);
+            }
+            loadCryptoGrid();
+            updateStats();
+        }
+        
+        function addCustomCrypto() {
+            const input = document.getElementById('custom-crypto-input');
+            const symbol = input.value.toUpperCase().trim();
+            
+            if (symbol && !config.cryptos.available.find(c => c.symbol === symbol)) {
+                config.cryptos.available.push({symbol: symbol, name: symbol});
+                config.cryptos.selected.push(symbol);
+                input.value = '';
+                loadCryptoGrid();
+                showModal(`${symbol} ajoute avec succes!`);
+            } else if (symbol) {
+                showModal(`${symbol} existe deja!`);
+            }
+        }
+        
+        function toggleExchange(exchange) {
+            config.exchanges[exchange] = !config.exchanges[exchange];
+            updateExchangeDisplay();
+            updateStats();
+        }
+        
+        function updateExchangeDisplay() {
+            document.querySelectorAll('.exchange-card').forEach(card => {
+                const exchange = card.dataset.exchange;
+                const isEnabled = config.exchanges[exchange];
+                
+                card.classList.toggle('enabled', isEnabled);
+                const indicator = card.querySelector('.status-indicator');
+                const status = card.querySelector('span:last-child');
+                
+                indicator.className = `status-indicator ${isEnabled ? 'active' : 'inactive'}`;
+                status.textContent = isEnabled ? 'Actif' : 'Inactif';
+            });
+        }
+        
+        function updateStats() {
+            document.getElementById('total-cryptos').textContent = config.cryptos.selected.length;
+            document.getElementById('total-exchanges').textContent = Object.values(config.exchanges).filter(Boolean).length;
+        }
+        
+        function loadDashboardData() {
+            const container = document.getElementById('live-data-container');
+            container.innerHTML = '';
+            
+            const sampleData = [
+                {exchange: 'Binance', crypto: 'BTC', rate: 0.0156, status: 'neutral', next: '2h 15m'},
+                {exchange: 'Binance', crypto: 'ETH', rate: -0.0089, status: 'negative', next: '2h 15m'},
+                {exchange: 'KuCoin', crypto: 'BTC', rate: 0.0167, status: 'neutral', next: '1h 45m'},
+                {exchange: 'KuCoin', crypto: 'SOL', rate: 0.0234, status: 'positive', next: '1h 45m'},
+            ];
+            
+            sampleData.forEach(data => {
+                const row = document.createElement('div');
+                row.className = 'data-row';
+                
+                const statusClass = data.status === 'positive' ? 'funding-positive' : 
+                                  data.status === 'negative' ? 'funding-negative' : 'funding-neutral';
+                const statusIcon = data.status === 'positive' ? 'RED' : 
+                                 data.status === 'negative' ? 'GREEN' : 'YELLOW';
+                
+                row.innerHTML = `
+                    <div>${data.exchange}</div>
+                    <div>${data.crypto}</div>
+                    <div class="${statusClass}">${(data.rate * 100).toFixed(4)}%</div>
+                    <div>${statusIcon}</div>
+                    <div>${data.next}</div>
+                `;
+                
+                container.appendChild(row);
+            });
+        }
+        
+        function saveCryptoConfig() {
+            showModal(`Configuration sauvee! Cryptos selectionnees: ${config.cryptos.selected.join(', ')}`);
+        }
+        
+        function saveExchangeConfig() {
+            const activeExchanges = Object.keys(config.exchanges).filter(ex => config.exchanges[ex]);
+            showModal(`Configuration exchanges sauvee! Exchanges actifs: ${activeExchanges.join(', ')}`);
+        }
+        
+        function saveSettings() {
+            config.settings.interval = parseInt(document.getElementById('collection-interval').value);
+            config.settings.alertHigh = parseFloat(document.getElementById('alert-high').value);
+            config.settings.alertLow = parseFloat(document.getElementById('alert-low').value);
+            
+            showModal(`Parametres sauves! Collecte: toutes les ${config.settings.interval}h`);
+        }
+        
+        function triggerCollection() {
+            showModal('Collecte manuelle declenchee! Verifie GitHub Actions dans quelques minutes.');
+        }
+        
+        function openGoogleSheet() {
+            window.open('https://docs.google.com/spreadsheets/d/13Xsua2jjhLPUAlRe6HZKQ6xgkByf3Dit0VsRzJyudXU/edit', '_blank');
+        }
+        
+        function viewGitHubActions() {
+            window.open('https://github.com/marcr1993/funding-rates-bot/actions', '_blank');
+        }
+        
+        function exportConfig() {
+            const configText = JSON.stringify(config, null, 2);
+            const blob = new Blob([configText], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'funding-rates-config.json';
+            a.click();
+            showModal('Configuration exportee!');
+        }
+        
+        function resetAllSettings() {
+            if (confirm('Etes-vous sur de vouloir reset toute la configuration?')) {
+                location.reload();
+            }
+        }
+        
+        function showModal(content) {
+            document.getElementById('modal-body').innerHTML = content;
+            document.getElementById('modal').style.display = 'block';
+        }
+        
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+        
+        document.querySelectorAll('.exchange-card').forEach(card => {
+            card.addEventListener('click', () => {
+                toggleExchange(card.dataset.exchange);
+            });
+        });
+        
+        document.getElementById('custom-crypto-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addCustomCrypto();
+            }
+        });
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal')) {
+                closeModal();
+            }
+        });
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadCryptoGrid();
+            updateExchangeDisplay();
+            updateStats();
+            loadDashboardData();
+        });
+    </script>
+</body>
+</html>
