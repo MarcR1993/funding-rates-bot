@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>🚀 Funding Rates Bot - Configuration v2</title>
+   <title>Funding Rates Bot - Configuration v2</title>
     <style>
         * {
             margin: 0;
@@ -323,21 +323,21 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 Funding Rates Bot</h1>
+            <h1>FUNDING RATES BOT</h1>
             <p>Configuration facile - Interface No-Code</p>
         </div>
         
         <div class="tabs">
-            <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
-            <div class="tab" onclick="showTab('cryptos')">💰 Cryptos</div>
-            <div class="tab" onclick="showTab('exchanges')">🏢 Exchanges</div>
-            <div class="tab" onclick="showTab('settings')">⚙️ Paramètres</div>
+            <div class="tab active" onclick="showTab('dashboard')">DASHBOARD</div>
+            <div class="tab" onclick="showTab('cryptos')">CRYPTOS</div>
+            <div class="tab" onclick="showTab('exchanges')">EXCHANGES</div>
+            <div class="tab" onclick="showTab('settings')">PARAMETRES</div>
         </div>
         
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content active">
             <div class="card">
-                <h3>📈 Statut du Bot</h3>
+                <h3>Statut du Bot</h3>
                 <div style="display: flex; align-items: center; margin: 15px 0;">
                     <span class="status-indicator active"></span>
                     <span>Bot actif - Prochaine collecte dans <span id="next-run">2h 15m</span></span>
@@ -345,7 +345,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
                     <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
                         <div style="font-size: 2em; font-weight: bold;" id="total-cryptos">13</div>
-                        <div style="opacity: 0.8;">Cryptos surveillées</div>
+                        <div style="opacity: 0.8;">Cryptos surveillees</div>
                     </div>
                     <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
                         <div style="font-size: 2em; font-weight: bold;" id="total-exchanges">2</div>
@@ -359,7 +359,7 @@
             </div>
             
             <div class="card">
-                <h3>📊 Données en Temps Réel</h3>
+                <h3>Donnees en Temps Reel</h3>
                 <div class="live-data">
                     <div class="data-row data-header">
                         <div>Exchange</div>
@@ -369,36 +369,36 @@
                         <div>Prochaine</div>
                     </div>
                     <div id="live-data-container">
-                        <!-- Les données seront chargées ici -->
+                        <!-- Les donnees seront chargees ici -->
                     </div>
                 </div>
             </div>
             
             <div style="text-align: center; margin: 20px 0;">
-                <button class="btn primary" onclick="triggerCollection()">🚀 Lancer Collecte Maintenant</button>
-                <button class="btn" onclick="openGoogleSheet()">📊 Voir Google Sheet</button>
-                <button class="btn" onclick="viewGitHubActions()">⚙️ GitHub Actions</button>
+                <button class="btn primary" onclick="triggerCollection()">LANCER COLLECTE</button>
+                <button class="btn" onclick="openGoogleSheet()">VOIR GOOGLE SHEET</button>
+                <button class="btn" onclick="viewGitHubActions()">GITHUB ACTIONS</button>
             </div>
         </div>
         
         <!-- Cryptos Tab -->
         <div id="cryptos" class="tab-content">
             <div class="card">
-                <h3>💰 Gestion des Cryptomonnaies</h3>
-                <p>Clique sur les cryptos pour les activer/désactiver</p>
+                <h3>Gestion des Cryptomonnaies</h3>
+                <p>Clique sur les cryptos pour les activer/desactiver</p>
                 
                 <div class="custom-crypto">
                     <input type="text" id="custom-crypto-input" placeholder="Ajouter une crypto (ex: AVAX, UNI, AAVE...)" maxlength="10">
-                    <button class="btn primary" onclick="addCustomCrypto()">➕ Ajouter</button>
+                    <button class="btn primary" onclick="addCustomCrypto()">AJOUTER</button>
                 </div>
                 
                 <div class="crypto-grid" id="crypto-grid">
-                    <!-- Les cryptos seront générées dynamiquement -->
+                    <!-- Les cryptos seront generees dynamiquement -->
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn primary" onclick="saveCryptoConfig()">💾 Sauvegarder Configuration</button>
-                    <button class="btn" onclick="resetCryptos()">🔄 Reset par Défaut</button>
+                    <button class="btn primary" onclick="saveCryptoConfig()">SAUVEGARDER</button>
+                    <button class="btn" onclick="resetCryptos()">RESET</button>
                 </div>
             </div>
         </div>
@@ -406,12 +406,12 @@
         <!-- Exchanges Tab -->
         <div id="exchanges" class="tab-content">
             <div class="card">
-                <h3>🏢 Gestion des Exchanges</h3>
-                <p>Active/désactive les exchanges que tu veux surveiller</p>
+                <h3>Gestion des Exchanges</h3>
+                <p>Active/desactive les exchanges que tu veux surveiller</p>
                 
                 <div class="exchange-grid">
                     <div class="exchange-card enabled" data-exchange="binance">
-                        <div class="exchange-logo">🟡</div>
+                        <div class="exchange-logo">BIN</div>
                         <h4>Binance</h4>
                         <p>Futures USDT</p>
                         <div style="margin-top: 10px;">
@@ -421,7 +421,7 @@
                     </div>
                     
                     <div class="exchange-card enabled" data-exchange="kucoin">
-                        <div class="exchange-logo">🔵</div>
+                        <div class="exchange-logo">KUC</div>
                         <h4>KuCoin</h4>
                         <p>Futures USDT</p>
                         <div style="margin-top: 10px;">
@@ -431,7 +431,7 @@
                     </div>
                     
                     <div class="exchange-card" data-exchange="okx">
-                        <div class="exchange-logo">⚫</div>
+                        <div class="exchange-logo">OKX</div>
                         <h4>OKX</h4>
                         <p>Perpetual Swaps</p>
                         <div style="margin-top: 10px;">
@@ -441,7 +441,7 @@
                     </div>
                     
                     <div class="exchange-card" data-exchange="bybit">
-                        <div class="exchange-logo">🟠</div>
+                        <div class="exchange-logo">BYB</div>
                         <h4>Bybit</h4>
                         <p>USDT Perpetual</p>
                         <div style="margin-top: 10px;">
@@ -452,7 +452,7 @@
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn primary" onclick="saveExchangeConfig()">💾 Sauvegarder Configuration</button>
+                    <button class="btn primary" onclick="saveExchangeConfig()">SAUVEGARDER</button>
                 </div>
             </div>
         </div>
@@ -461,565 +461,4 @@
         <div id="settings" class="tab-content">
             <div class="settings-grid">
                 <div class="card">
-                    <h3>⏰ Fréquence de Collecte</h3>
-                    <div class="setting-item">
-                        <span>Intervalle de collecte :</span>
-                        <select id="collection-interval">
-                            <option value="4">Toutes les 4 heures</option>
-                            <option value="8" selected>Toutes les 8 heures (recommandé)</option>
-                            <option value="12">Toutes les 12 heures</option>
-                            <option value="24">Une fois par jour</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <h3>🚨 Alertes</h3>
-                    <div class="setting-item">
-                        <span>Seuil alerte haute (%) :</span>
-                        <input type="number" id="alert-high" value="0.5" step="0.1" min="0" max="5">
-                    </div>
-                    <div class="setting-item">
-                        <span>Seuil alerte basse (%) :</span>
-                        <input type="number" id="alert-low" value="-0.5" step="0.1" min="-5" max="0">
-                    </div>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="btn primary" onclick="saveSettings()">💾 Sauvegarder Paramètres</button>
-                <button class="btn" onclick="exportConfig()">📤 Exporter Configuration</button>
-                <button class="btn danger" onclick="resetAllSettings()">🔄 Reset Complet</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <div id="modal-body"></div>
-        </div>
-    </div>
-    
-    <script>
-        // Configuration globale
-        let config = {
-            cryptos: {
-                selected: ['BTC', 'ETH', 'ADA', 'SOL', 'DOT', 'LINK', 'MATIC'],
-                available: [
-                    {symbol: 'BTC', name: 'Bitcoin'},
-                    {symbol: 'ETH', name: 'Ethereum'},
-                    {symbol: 'ADA', name: 'Cardano'},
-                    {symbol: 'SOL', name: 'Solana'},
-                    {symbol: 'DOT', name: 'Polkadot'},
-                    {symbol: 'LINK', name: 'Chainlink'},
-                    {symbol: 'MATIC', name: 'Polygon'},
-                    {symbol: 'AVAX', name: 'Avalanche'},
-                    {symbol: 'UNI', name: 'Uniswap'},
-                    {symbol: 'AAVE', name: 'Aave'},
-                    {symbol: 'ATOM', name: 'Cosmos'},
-                    {symbol: 'NEAR', name: 'Near Protocol'},
-                    {symbol: 'FTM', name: 'Fantom'},
-                    {symbol: 'ALGO', name: 'Algorand'},
-                    {symbol: 'ICP', name: 'Internet Computer'},
-                    {symbol: 'XRP', name: 'Ripple'},
-                    {symbol: 'LTC', name: 'Litecoin'},
-                    {symbol: 'BCH', name: 'Bitcoin Cash'}
-                ]
-            },
-            exchanges: {
-                binance: true,
-                kucoin: true,
-                okx: false,
-                bybit: false
-            },
-            settings: {
-                interval: 8,
-                alertHigh: 0.5,
-                alertLow: -0.5
-            }
-        };
-        
-        // Fonctions d'interface
-        function showTab(tabName) {
-            // Cacher tous les contenus
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Désactiver tous les onglets
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Activer l'onglet sélectionné
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-            
-            // Charger les données spécifiques à l'onglet
-            if (tabName === 'cryptos') {
-                loadCryptoGrid();
-            } else if (tabName === 'dashboard') {
-                loadDashboardData();
-            }
-        }
-        
-        function loadCryptoGrid() {
-            const grid = document.getElementById('crypto-grid');
-            grid.innerHTML = '';
-            
-            config.cryptos.available.forEach(crypto => {
-                const isSelected = config.cryptos.selected.includes(crypto.symbol);
-                const cryptoElement = document.createElement('div');
-                cryptoElement.className = `crypto-item ${isSelected ? 'selected' : ''}`;
-                cryptoElement.onclick = () => toggleCrypto(crypto.symbol);
-                
-                cryptoElement.innerHTML = `
-                    <div class="crypto-symbol">${crypto.symbol}</div>
-                    <div class="crypto-name">${crypto.name}</div>
-                `;
-                
-                grid.appendChild(cryptoElement);
-            });
-        }
-        
-        function toggleCrypto(symbol) {
-            const index = config.cryptos.selected.indexOf(symbol);
-            if (index > -1) {
-                config.cryptos.selected.splice(index, 1);
-            } else {
-                config.cryptos.selected.push(symbol);
-            }
-            loadCryptoGrid();
-            updateStats();
-        }
-        
-        function addCustomCrypto() {
-            const input = document.getElementById('custom-crypto-input');
-            const symbol = input.value.toUpperCase().trim();
-            
-            if (symbol && !config.cryptos.available.find(c => c.symbol === symbol)) {
-                config.cryptos.available.push({symbol: symbol, name: symbol});
-                config.cryptos.selected.push(symbol);
-                input.value = '';
-                loadCryptoGrid();
-                showModal(`✅ ${symbol} ajouté avec succès!`);
-            } else if (symbol) {
-                showModal(`⚠️ ${symbol} existe déjà!`);
-            }
-        }
-        
-        function toggleExchange(exchange) {
-            config.exchanges[exchange] = !config.exchanges[exchange];
-            updateExchangeDisplay();
-            updateStats();
-        }
-        
-        function updateExchangeDisplay() {
-            document.querySelectorAll('.exchange-card').forEach(card => {
-                const exchange = card.dataset.exchange;
-                const isEnabled = config.exchanges[exchange];
-                
-                card.classList.toggle('enabled', isEnabled);
-                const indicator = card.querySelector('.status-indicator');
-                const status = card.querySelector('span:last-child');
-                
-                indicator.className = `status-indicator ${isEnabled ? 'active' : 'inactive'}`;
-                status.textContent = isEnabled ? 'Actif' : 'Inactif';
-            });
-        }
-        
-        function updateStats() {
-            document.getElementById('total-cryptos').textContent = config.cryptos.selected.length;
-            document.getElementById('total-exchanges').textContent = Object.values(config.exchanges).filter(Boolean).length;
-        }
-        
-        function loadDashboardData() {
-            // Simuler des données en temps réel
-            const container = document.getElementById('live-data-container');
-            container.innerHTML = '';
-            
-            const sampleData = [
-                {exchange: 'Binance', crypto: 'BTC', rate: 0.0156, status: 'neutral', next: '2h 15m'},
-                {exchange: 'Binance', crypto: 'ETH', rate: -0.0089, status: 'negative', next: '2h 15m'},
-                {exchange: 'KuCoin', crypto: 'BTC', rate: 0.0167, status: 'neutral', next: '1h 45m'},
-                {exchange: 'KuCoin', crypto: 'SOL', rate: 0.0234, status: 'positive', next: '1h 45m'},
-            ];
-            
-            sampleData.forEach(data => {
-                const row = document.createElement('div');
-                row.className = 'data-row';
-                
-                const statusClass = data.status === 'positive' ? 'funding-positive' : 
-                                  data.status === 'negative' ? 'funding-negative' : 'funding-neutral';
-                const statusIcon = data.status === 'positive' ? '🔴' : 
-                                 data.status === 'negative' ? '🟢' : '🟡';
-                
-                row.innerHTML = `
-                    <div>${data.exchange}</div>
-                    <div>${data.crypto}</div>
-                    <div class="${statusClass}">${(data.rate * 100).toFixed(4)}%</div>
-                    <div>${statusIcon}</div>
-                    <div>${data.next}</div>
-                `;
-                
-                container.appendChild(row);
-            });
-        }
-        
-        // Fonctions d'action
-        function saveCryptoConfig() {
-            showModal(`✅ Configuration sauvée!<br><br>Cryptos sélectionnées: ${config.cryptos.selected.join(', ')}<br><br>⚠️ Redémarrage du bot nécessaire pour appliquer les changements.`);
-        }
-        
-        function saveExchangeConfig() {
-            const activeExchanges = Object.keys(config.exchanges).filter(ex => config.exchanges[ex]);
-            showModal(`✅ Configuration des exchanges sauvée!<br><br>Exchanges actifs: ${activeExchanges.join(', ')}<br><br>⚠️ Redémarrage du bot nécessaire.`);
-        }
-        
-        function saveSettings() {
-            config.settings.interval = parseInt(document.getElementById('collection-interval').value);
-            config.settings.alertHigh = parseFloat(document.getElementById('alert-high').value);
-            config.settings.alertLow = parseFloat(document.getElementById('alert-low').value);
-            
-            showModal(`✅ Paramètres sauvés!<br><br>Collecte: toutes les ${config.settings.interval}h<br>Alertes: ${config.settings.alertLow}% à ${config.settings.alertHigh}%`);
-        }
-        
-        function triggerCollection() {
-            showModal(`🚀 Collecte manuelle déclenchée!<br><br>Vérifie GitHub Actions dans quelques minutes pour voir les résultats.`);
-        }
-        
-        function openGoogleSheet() {
-            window.open('https://docs.google.com/spreadsheets/d/13Xsua2jjhLPUAlRe6HZKQ6xgkByf3Dit0VsRzJyudXU/edit', '_blank');
-        }
-        
-        function viewGitHubActions() {
-            window.open('https://github.com/marcr1993/funding-rates-bot/actions', '_blank');
-        }
-        
-        function exportConfig() {
-            const configText = JSON.stringify(config, null, 2);
-            const blob = new Blob([configText], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'funding-rates-config.json';
-            a.click();
-            showModal('📤 Configuration exportée!');
-        }
-        
-        function resetAllSettings() {
-            if (confirm('⚠️ Êtes-vous sûr de vouloir reset toute la configuration?')) {
-                location.reload();
-            }
-        }
-        
-        function showModal(content) {
-            document.getElementById('modal-body').innerHTML = content;
-            document.getElementById('modal').style.display = 'block';
-        }
-        
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-        
-        // Event listeners
-        document.querySelectorAll('.exchange-card').forEach(card => {
-            card.addEventListener('click', () => {
-                toggleExchange(card.dataset.exchange);
-            });
-        });
-        
-        document.getElementById('custom-crypto-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addCustomCrypto();
-            }
-        });
-        
-        // Fermer modal en cliquant à l'extérieur
-        window.addEventListener('click', (e) => {
-            if (e.target === document.getElementById('modal')) {
-                closeModal();
-            }
-        });
-        
-        // Mise à jour du temps jusqu'à la prochaine collecte
-        function updateNextRun() {
-            const now = new Date();
-            const nextRuns = [6, 14, 22].map(hour => {
-                const next = new Date();
-                next.setHours(hour, 0, 0, 0);
-                if (next <= now) next.setDate(next.getDate() + 1);
-                return next;
-            });
-            
-            const nextRun = nextRuns.reduce((closest, current) => 
-                current < closest ? current : closest
-            );
-            
-            const diff = nextRun - now;
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            
-            document.getElementById('next-run').textContent = `${hours}h ${minutes}m`;
-        }
-        
-        // Génération automatique de configuration GitHub
-        function generateGitHubConfig() {
-            const selectedCryptos = config.cryptos.selected;
-            const activeExchanges = Object.keys(config.exchanges).filter(ex => config.exchanges[ex]);
-            
-            let binanceSymbols = selectedCryptos.map(crypto => `${crypto}USDT`);
-            let kucoinSymbols = selectedCryptos.map(crypto => {
-                if (crypto === 'BTC') return 'XBTUSDTM';
-                return `${crypto}USDTM`;
-            });
-            
-            const cronExpression = `'0 */${config.settings.interval} * * *'`;
-            
-            const yamlConfig = `name: 🚀 Funding Rates Bot Auto-Generated
-
-on:
-  schedule:
-    - cron: ${cronExpression}
-  workflow_dispatch:
-
-jobs:
-  collect:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: 📦 Checkout
-      uses: actions/checkout@v4
-      
-    - name: 🐍 Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        
-    - name: 📚 Install dependencies
-      run: pip install requests gspread google-auth
-      
-    - name: 🔑 Setup credentials
-      run: echo '\${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
-      
-    - name: 🚀 Collect & Save Data
-      run: |
-        python3 -c "
-        import requests, gspread, time
-        from datetime import datetime
-        from google.oauth2.service_account import Credentials
-        
-        print('🚀 Configuration automatique générée...')
-        print('Cryptos: ${selectedCryptos.join(', ')}')
-        print('Exchanges: ${activeExchanges.join(', ')}')
-        print('Intervalle: ${config.settings.interval}h')
-        
-        # Google Sheets setup
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = Credentials.from_service_account_file('credentials.json', scopes=scope)
-        gc = gspread.authorize(creds)
-        sheet = gc.open_by_key('\${{ secrets.SHEET_ID }}')
-        
-        try:
-            worksheet = sheet.worksheet('Funding Rates')
-        except:
-            worksheet = sheet.add_worksheet(title='Funding Rates', rows='1000', cols='10')
-            worksheet.append_row(['Timestamp', 'Date', 'Exchange', 'Symbol', 'Funding_Rate_%', 'Next_Funding_Time', 'Status'])
-        
-        print('✅ Google Sheets connecté')
-        
-        rows = []
-        timestamp = int(time.time())
-        date_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
-        ${activeExchanges.includes('binance') ? `
-        # Binance
-        print('🔄 Collecte Binance...')
-        try:
-            symbols = ${JSON.stringify(binanceSymbols)}
-            binance_data = requests.get('https://fapi.binance.com/fapi/v1/premiumIndex', timeout=10).json()
-            
-            for item in binance_data:
-                if item.get('symbol') in symbols:
-                    rate = float(item.get('lastFundingRate', 0)) * 100
-                    status = '🔴 LONG PAY' if rate > ${config.settings.alertHigh} else '🟢 SHORT PAY' if rate < ${config.settings.alertLow} else '🟡 NEUTRAL'
-                    next_time = datetime.fromtimestamp(int(item.get('nextFundingTime', 0))/1000).strftime('%Y-%m-%d %H:%M:%S')
-                    rows.append([timestamp, date_str, 'Binance', item['symbol'], round(rate, 4), next_time, status])
-            
-            print(f'✅ Binance: {len([r for r in rows if r[2] == \"Binance\"])} cryptos')
-        except Exception as e:
-            print(f'❌ Erreur Binance: {e}')
-        ` : ''}
-        
-        ${activeExchanges.includes('kucoin') ? `
-        # KuCoin
-        print('🔄 Collecte KuCoin...')
-        try:
-            kucoin_symbols = ${JSON.stringify(kucoinSymbols)}
-            for sym in kucoin_symbols:
-                try:
-                    r = requests.get(f'https://api-futures.kucoin.com/api/v1/funding-rate/{sym}/current', timeout=10)
-                    data = r.json()
-                    if data.get('code') == '200000' and 'data' in data:
-                        rate = float(data['data'].get('value', 0)) * 100
-                        status = '🔴 LONG PAY' if rate > ${config.settings.alertHigh} else '🟢 SHORT PAY' if rate < ${config.settings.alertLow} else '🟡 NEUTRAL'
-                        next_time = datetime.fromtimestamp(int(data['data'].get('timePoint', 0))/1000).strftime('%Y-%m-%d %H:%M:%S')
-                        symbol = sym.replace('USDTM', '').replace('XBT', 'BTC') + 'USDT'
-                        rows.append([timestamp, date_str, 'KuCoin', symbol, round(rate, 4), next_time, status])
-                    time.sleep(0.1)
-                except:
-                    continue
-            
-            print(f'✅ KuCoin: {len([r for r in rows if r[2] == \"KuCoin\"])} cryptos')
-        except Exception as e:
-            print(f'❌ Erreur KuCoin: {e}')
-        ` : ''}
-        
-        # Sauvegarder
-        if rows:
-            worksheet.append_rows(rows)
-            print(f'✅ {len(rows)} lignes ajoutées à Google Sheets')
-            print('🎯 Collecte terminée avec succès!')
-            
-            # Alertes
-            alerts = [r for r in rows if '🔴' in r[6] or '🟢' in r[6]]
-            if alerts:
-                print('🚨 ALERTES DÉTECTÉES:')
-                for alert in alerts[:5]:  # Max 5 alertes
-                    print(f'  {alert[2]} {alert[3]}: {alert[4]}% {alert[6]}')
-        else:
-            print('❌ Aucune donnée collectée')
-        "`;
-            
-            return yamlConfig;
-        }
-        
-        function downloadYamlConfig() {
-            const yamlContent = generateGitHubConfig();
-            const blob = new Blob([yamlContent], {type: 'text/yaml'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'funding-rates.yml';
-            a.click();
-            
-            showModal(`📁 Configuration GitHub générée!<br><br>
-                <div style="text-align: left; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; font-family: monospace; font-size: 0.9em;">
-                1. Remplace le contenu de .github/workflows/funding-rates.yml<br>
-                2. Commit les changements<br>
-                3. Ton bot utilisera la nouvelle configuration!
-                </div>
-                
-                <button class="btn primary" onclick="viewYamlInstructions()">📖 Instructions Détaillées</button>`);
-        }
-        
-        function viewYamlInstructions() {
-            showModal(`📖 Instructions pour mettre à jour le bot:<br><br>
-                
-                <div style="text-align: left; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <strong>Étape 1:</strong> Va sur GitHub<br>
-                → funding-rates-bot → .github/workflows/funding-rates.yml<br><br>
-                
-                <strong>Étape 2:</strong> Clique sur l'icône crayon ✏️<br><br>
-                
-                <strong>Étape 3:</strong> Sélectionne tout (Ctrl+A) et supprime<br><br>
-                
-                <strong>Étape 4:</strong> Colle le nouveau contenu téléchargé<br><br>
-                
-                <strong>Étape 5:</strong> Commit changes<br><br>
-                
-                <strong>Étape 6:</strong> Test manuel dans Actions!
-                </div>
-                
-                <button class="btn" onclick="window.open('https://github.com/marcr1993/funding-rates-bot/blob/main/.github/workflows/funding-rates.yml', '_blank')">🔗 Ouvrir le fichier GitHub</button>`);
-        }
-        
-        // Nouvelles fonctions d'export
-        function exportFullConfig() {
-            const fullConfig = {
-                metadata: {
-                    generated: new Date().toISOString(),
-                    version: '2.0',
-                    description: 'Configuration complète du Funding Rates Bot'
-                },
-                config: config,
-                github_workflow: generateGitHubConfig()
-            };
-            
-            const blob = new Blob([JSON.stringify(fullConfig, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'funding-rates-complete-config.json';
-            a.click();
-            
-            showModal('📦 Configuration complète exportée!<br><br>Contient: config interface + workflow GitHub');
-        }
-        
-        // Amélioration des fonctions existantes
-        function saveCryptoConfig() {
-            const selectedCount = config.cryptos.selected.length;
-            downloadYamlConfig();
-            showModal(`✅ Configuration cryptos sauvée!<br><br>
-                ${selectedCount} cryptos sélectionnées: ${config.cryptos.selected.join(', ')}<br><br>
-                📁 Fichier YAML téléchargé automatiquement!<br>
-                ⚠️ Applique-le sur GitHub pour activer les changements.`);
-        }
-        
-        function saveExchangeConfig() {
-            const activeExchanges = Object.keys(config.exchanges).filter(ex => config.exchanges[ex]);
-            downloadYamlConfig();
-            showModal(`✅ Configuration exchanges sauvée!<br><br>
-                Exchanges actifs: ${activeExchanges.join(', ')}<br><br>
-                📁 Nouveau workflow généré et téléchargé!`);
-        }
-        
-        function saveSettings() {
-            config.settings.interval = parseInt(document.getElementById('collection-interval').value);
-            config.settings.alertHigh = parseFloat(document.getElementById('alert-high').value);
-            config.settings.alertLow = parseFloat(document.getElementById('alert-low').value);
-            
-            downloadYamlConfig();
-            showModal(`✅ Paramètres sauvés et workflow généré!<br><br>
-                • Collecte: toutes les ${config.settings.interval}h<br>
-                • Alertes: ${config.settings.alertLow}% à ${config.settings.alertHigh}%<br><br>
-                📁 Applique le nouveau workflow sur GitHub!`);
-        }
-        
-        // Ajout du bouton export avancé dans les paramètres
-        function addAdvancedExportButton() {
-            const settingsDiv = document.querySelector('#settings .settings-grid').parentNode;
-            const exportSection = document.createElement('div');
-            exportSection.className = 'card';
-            exportSection.innerHTML = `
-                <h3>📁 Export Avancé</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
-                    <button class="btn primary" onclick="downloadYamlConfig()">📄 Générer Workflow GitHub</button>
-                    <button class="btn" onclick="exportFullConfig()">📦 Export Configuration Complète</button>
-                    <button class="btn" onclick="viewYamlInstructions()">📖 Instructions GitHub</button>
-                </div>
-            `;
-            
-            settingsDiv.insertBefore(exportSection, settingsDiv.lastElementChild);
-        }
-        
-        // Initialisation complète
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCryptoGrid();
-            updateExchangeDisplay();
-            updateStats();
-            loadDashboardData();
-            addAdvancedExportButton();
-            
-            // Mise à jour du timer toutes les minutes
-            setInterval(updateNextRun, 60000);
-            updateNextRun();
-            
-            // Simulation de mise à jour des données toutes les 30 secondes
-            setInterval(loadDashboardData, 30000);
-        });
-    </script>
-</body>
-</html>
+                    <h3
