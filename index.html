@@ -685,23 +685,22 @@
             }
         };
 
-        // Initialisation avec test API
+        // Initialisation SANS fallback - API obligatoire
         document.addEventListener('DOMContentLoaded', async function() {
             setupEventListeners();
             
-            // Tester la connectivité avant de charger les données
+            // Test API obligatoire
             const apiWorking = await testAPIConnection();
             
             if (apiWorking) {
                 console.log('🚀 API disponible, chargement des vraies données...');
                 refreshData();
+                startAutoRefresh();
             } else {
-                console.log('📊 API indisponible, mode fallback...');
-                handleDataError(); // Charge les données simulées
-                updateConnectionStatus('Mode Simulation ⚠️', 'error');
+                console.log('❌ API indisponible - Arrêt du chargement');
+                showAPIError();
+                // PAS de fallback, PAS d'auto-refresh
             }
-            
-            startAutoRefresh();
         });
 
         function setupEventListeners() {
@@ -728,10 +727,10 @@
             if (isLoading) return;
             
             setLoading(true);
-            updateConnectionStatus('Chargement données...', 'loading');
+            updateConnectionStatus('Chargement données LIVE...', 'loading');
 
             try {
-                console.log(`🔄 Fetching data from: ${CURRENT_BACKEND_URL}`);
+                console.log(`🔄 Fetching REAL data from: ${CURRENT_BACKEND_URL}`);
                 const startTime = Date.now();
                 
                 let response;
@@ -758,25 +757,22 @@
                 
                 const responseTime = ((Date.now() - startTime) / 1000).toFixed(2);
                 console.log(`📊 Response time: ${responseTime}s`);
-                console.log(`📊 Data received:`, result);
+                console.log(`📊 REAL data received:`, result);
                 
-                if (result.success && result.data) {
+                if (result.success && result.data && result.data.length > 0) {
                     currentData = result.data;
                     updateStats(result, responseTime);
                     renderCurrentView();
-                    updateConnectionStatus(`Données live (${responseTime}s) ✅`, 'success');
-                    console.log(`✅ ${currentData.length} pairs chargées avec succès`);
+                    updateConnectionStatus(`📡 LIVE DATA (${responseTime}s) ✅`, 'success');
+                    console.log(`✅ ${currentData.length} REAL pairs chargées`);
                 } else {
-                    throw new Error('Format de réponse invalide');
+                    throw new Error('Aucune donnée reçue de l\'API');
                 }
 
             } catch (error) {
-                console.error('❌ Erreur lors du chargement:', error);
-                
-                // Fallback intelligent
-                console.log('🔄 Activation du mode simulation...');
-                handleDataError();
-                updateConnectionStatus('Simulation active ⚠️', 'error');
+                console.error('❌ ERREUR API - Pas de données simulées:', error);
+                showAPIError();
+                updateConnectionStatus('❌ API HORS LIGNE', 'error');
             } finally {
                 setLoading(false);
             }
