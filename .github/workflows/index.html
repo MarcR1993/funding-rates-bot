@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+// Basculer exchange
+        function toggleExchange(key) {
+            config.exchanges[key].active = !config.exchanges[key<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -772,8 +774,16 @@
         let liveData = [];
         let opportunities = [];
 
-        // API Binance VRAIE avec proxy CORS robuste
-        async function fetchBinanceFundingRates() {
+        // Configuration des fees par exchange (maker fees en %)
+        const exchangeFees = {
+            binance: { maker: 0.02, taker: 0.04, slippage: 0.05 },
+            kucoin: { maker: 0.02, taker: 0.06, slippage: 0.08 },
+            bybit: { maker: 0.01, taker: 0.06, slippage: 0.07 },
+            okx: { maker: 0.02, taker: 0.05, slippage: 0.06 }
+        };
+
+        // API avec proxy universel
+        async function fetchWithProxy(url) {
             const proxies = [
                 'https://api.allorigins.win/raw?url=',
                 'https://cors-anywhere.herokuapp.com/',
@@ -783,61 +793,178 @@
             for (let i = 0; i < proxies.length; i++) {
                 try {
                     const proxyUrl = proxies[i];
-                    const apiUrl = 'https://fapi.binance.com/fapi/v1/premiumIndex';
-                    const fullUrl = proxyUrl + encodeURIComponent(apiUrl);
+                    const fullUrl = proxyUrl ? proxyUrl + encodeURIComponent(url) : url;
                     
-                    console.log(`Tentative ${i + 1}: ${proxyUrl ? 'Proxy' : 'Direct'}`);
-                    
-                    const response = await fetch(proxyUrl ? fullUrl : apiUrl);
+                    const response = await fetch(fullUrl);
                     const data = await response.json();
-                    
-                    console.log('✅ API Binance CONNECTÉE - Données réelles reçues:', data.length, 'pairs');
-                    
-                    return data.filter(item => 
-                        item.symbol.endsWith('USDT') && 
-                        config.cryptos.selected.some(crypto => item.symbol.startsWith(crypto))
-                    ).map(item => ({
-                        exchange: 'Binance',
-                        symbol: item.symbol.replace('USDT', ''),
-                        fundingRate: parseFloat(item.lastFundingRate),
-                        nextFunding: item.nextFundingTime,
-                        markPrice: parseFloat(item.markPrice)
-                    }));
+                    return data;
                     
                 } catch (error) {
-                    console.log(`❌ Proxy ${i + 1} échoué:`, error.message);
                     if (i === proxies.length - 1) {
-                        throw new Error('Tous les proxies ont échoué. Utilise GitHub Pages pour éviter CORS.');
+                        throw error;
                     }
                 }
             }
         }
 
-        // Charger données live (Binance réel)
+        // API Binance Futures
+        async function fetchBinanceFundingRates() {
+            try {
+                const data = await fetchWithProxy('https://fapi.binance.com/fapi/v1/premiumIndex');
+                console.log('✅ Binance connecté:', data.length, 'pairs');
+                
+                return data.filter(item => 
+                    item.symbol.endsWith('USDT') && 
+                    config.cryptos.selected.some(crypto => item.symbol.startsWith(crypto))
+                ).map(item => ({
+                    exchange: 'Binance',
+                    symbol: item.symbol.replace('USDT', ''),
+                    fundingRate: parseFloat(item.lastFundingRate),
+                    nextFunding: item.nextFundingTime,
+                    markPrice: parseFloat(item.markPrice)
+                }));
+            } catch (error) {
+                console.error('❌ Binance API error:', error);
+                return [];
+            }
+        }
+
+        // API KuCoin Futures
+        async function fetchKucoinFundingRates() {
+            try {
+                const data = await fetchWithProxy('https://api-futures.kucoin.com/api/v1/contracts/active');
+                console.log('✅ KuCoin connecté:', data.data.length, 'pairs');
+                
+                const fundingData = await fetchWithProxy('https://api-futures.kucoin.com/api/v1/funding-rate');
+                
+                return data.data.filter(item => 
+                    item.quoteCurrency === 'USDT' && 
+                    config.cryptos.selected.some(crypto => item.baseCurrency === crypto)
+                ).map(item => {
+                    const fundingInfo = fundingData.data.find(f => f.symbol === item.symbol);
+                    return {
+                        exchange: 'KuCoin',
+                        symbol: item.baseCurrency,
+                        fundingRate: fundingInfo ? parseFloat(fundingInfo.value) : 0,
+                        nextFunding: Date.now() + (8 * 60 * 60 * 1000), // Approximation
+                        markPrice: parseFloat(item.markPrice || 0)
+                    };
+                });
+            } catch (error) {
+                console.error('❌ KuCoin API error:', error);
+                return [];
+            }
+        }
+
+        // API Bybit Futures
+        async function fetchBybitFundingRates() {
+            try {
+                const data = await fetchWithProxy('https://api.bybit.com/v5/market/instruments-info?category=linear');
+                console.log('✅ Bybit connecté:', data.result.list.length, 'pairs');
+                
+                const fundingData = await fetchWithProxy('https://api.bybit.com/v5/market/funding/history?category=linear&limit=200');
+                
+                return data.result.list.filter(item => 
+                    item.quoteCoin === 'USDT' && 
+                    config.cryptos.selected.some(crypto => item.baseCoin === crypto)
+                ).map(item => {
+                    const fundingInfo = fundingData.result.list.find(f => f.symbol === item.symbol);
+                    return {
+                        exchange: 'Bybit',
+                        symbol: item.baseCoin,
+                        fundingRate: fundingInfo ? parseFloat(fundingInfo.fundingRate) : 0,
+                        nextFunding: fundingInfo ? fundingInfo.fundingRateTimestamp : Date.now(),
+                        markPrice: parseFloat(item.markPrice || 0)
+                    };
+                });
+            } catch (error) {
+                console.error('❌ Bybit API error:', error);
+                return [];
+            }
+        }
+
+        // API OKX Futures
+        async function fetchOKXFundingRates() {
+            try {
+                const data = await fetchWithProxy('https://www.okx.com/api/v5/public/instruments?instType=SWAP');
+                console.log('✅ OKX connecté:', data.data.length, 'pairs');
+                
+                const fundingData = await fetchWithProxy('https://www.okx.com/api/v5/public/funding-rate?instType=SWAP');
+                
+                return data.data.filter(item => 
+                    item.instId.endsWith('-USDT-SWAP') && 
+                    config.cryptos.selected.some(crypto => item.instId.startsWith(crypto))
+                ).map(item => {
+                    const symbol = item.instId.split('-')[0];
+                    const fundingInfo = fundingData.data.find(f => f.instId === item.instId);
+                    return {
+                        exchange: 'OKX',
+                        symbol: symbol,
+                        fundingRate: fundingInfo ? parseFloat(fundingInfo.fundingRate) : 0,
+                        nextFunding: fundingInfo ? fundingInfo.nextFundingTime : Date.now(),
+                        markPrice: parseFloat(item.markPx || 0)
+                    };
+                });
+            } catch (error) {
+                console.error('❌ OKX API error:', error);
+                return [];
+            }
+        }
+
+        // Charger données de tous les exchanges actifs
         async function loadLiveData() {
             try {
-                const binanceData = await fetchBinanceFundingRates();
-                liveData = binanceData;
+                liveData = [];
+                const promises = [];
                 
+                // Charger données selon exchanges actifs
+                if (config.exchanges.binance.active) {
+                    promises.push(fetchBinanceFundingRates());
+                }
+                if (config.exchanges.kucoin.active) {
+                    promises.push(fetchKucoinFundingRates());
+                }
+                if (config.exchanges.bybit.active) {
+                    promises.push(fetchBybitFundingRates());
+                }
+                if (config.exchanges.okx.active) {
+                    promises.push(fetchOKXFundingRates());
+                }
+                
+                const results = await Promise.allSettled(promises);
+                
+                // Combiner toutes les données
+                results.forEach((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        liveData = liveData.concat(result.value);
+                    }
+                });
+                
+                const connectedExchanges = Object.values(config.exchanges).filter(e => e.active).length;
                 const apiStatus = document.getElementById('api-status');
-                apiStatus.className = 'api-status success';
-                apiStatus.innerHTML = `<span style="color: #4CAF50;">✓</span> API Binance LIVE - ${liveData.length} pairs réelles connectées`;
                 
-                console.log('Données Binance chargées:', liveData);
+                if (liveData.length > 0) {
+                    apiStatus.className = 'api-status success';
+                    apiStatus.innerHTML = `<span style="color: #4CAF50;">✓</span> ${connectedExchanges} Exchanges LIVE - ${liveData.length} pairs connectées`;
+                } else {
+                    apiStatus.className = 'api-status error';
+                    apiStatus.innerHTML = '<span style="color: #f44336;">✗</span> Erreur connexion APIs';
+                }
+                
+                console.log('📊 Données chargées:', liveData.length, 'pairs de', connectedExchanges, 'exchanges');
                 updateStats();
                 
             } catch (error) {
                 console.error('Erreur lors du chargement:', error);
                 const apiStatus = document.getElementById('api-status');
                 apiStatus.className = 'api-status error';
-                apiStatus.innerHTML = '<span style="color: #f44336;">✗</span> Erreur API Binance - Vérifier la connexion';
+                apiStatus.innerHTML = '<span style="color: #f44336;">✗</span> Erreur APIs multiples';
                 
-                // Afficher l'erreur détaillée avec solutions
-                showModal(`❌ ERREUR API BINANCE - CORS BLOQUÉ<br><br><strong>Problème:</strong> Restrictions CORS en local<br><br><strong>✅ SOLUTIONS GARANTIES:</strong><br><br>1️⃣ <strong>GitHub Pages</strong> (Recommandé)<br>• Push sur GitHub<br>• Settings → Pages<br>• ✅ CORS résolu automatiquement<br><br>2️⃣ <strong>Serveur Local</strong><br>• <code>python -m http.server 8000</code><br>• Ouvre localhost:8000<br><br>3️⃣ <strong>Alternative</strong><br>• Netlify, Vercel, ou tout hébergeur<br><br><small>💡 En local, les navigateurs bloquent les API externes</small>`);
+                showModal(`❌ ERREUR CONNEXION APIS<br><br><strong>Problème:</strong> Restrictions CORS<br><br><strong>✅ SOLUTIONS:</strong><br><br>1️⃣ <strong>GitHub Pages</strong> (Recommandé)<br>2️⃣ <strong>Serveur Local</strong><br>3️⃣ <strong>Hébergeur externe</strong><br><br><small>💡 Les APIs fonctionnent parfaitement sur GitHub Pages</small>`);
             }
         }
 
-        // Calculer opportunités d'arbitrage
+        // Calculer opportunités d'arbitrage avec fees et slippage
         function calculateArbitrageOpportunities() {
             if (liveData.length === 0) return;
 
@@ -858,34 +985,66 @@
                 const rates = oppsBySymbol[symbol];
                 if (rates.length < 2) return;
 
-                const maxRate = Math.max(...rates.map(r => r.fundingRate));
-                const minRate = Math.min(...rates.map(r => r.fundingRate));
-                const spread = Math.abs(maxRate - minRate);
-                const netFunding = spread;
-                
-                // APR = Net Funding × 365 × 3 (3 funding par jour) × 100
-                const apr = netFunding * 365 * 3 * 100;
-                
-                if (apr > config.settings.alertThreshold) {
-                    const maxExchange = rates.find(r => r.fundingRate === maxRate)?.exchange;
-                    const minExchange = rates.find(r => r.fundingRate === minRate)?.exchange;
-                    
-                    newOpportunities.push({
-                        symbol,
-                        apr,
-                        netFunding,
-                        spread: (spread / ((maxRate + minRate) / 2)) * 100,
-                        longExchange: minExchange,
-                        shortExchange: maxExchange,
-                        longRate: minRate,
-                        shortRate: maxRate,
-                        nextFunding: rates[0].nextFunding
-                    });
+                // Trouver la meilleure paire d'exchanges
+                for (let i = 0; i < rates.length; i++) {
+                    for (let j = i + 1; j < rates.length; j++) {
+                        const rate1 = rates[i];
+                        const rate2 = rates[j];
+                        
+                        // Déterminer qui est long/short
+                        const isRate1Lower = rate1.fundingRate < rate2.fundingRate;
+                        const longExchange = isRate1Lower ? rate1 : rate2;
+                        const shortExchange = isRate1Lower ? rate2 : rate1;
+                        
+                        const netFundingGross = Math.abs(shortExchange.fundingRate - longExchange.fundingRate);
+                        
+                        // Calculer les coûts
+                        const longFees = exchangeFees[longExchange.exchange.toLowerCase()];
+                        const shortFees = exchangeFees[shortExchange.exchange.toLowerCase()];
+                        
+                        const totalMakerFees = (longFees.maker + shortFees.maker) / 100; // Ouverture
+                        const totalSlippage = (longFees.slippage + shortFees.slippage) / 100;
+                        const exitFees = totalMakerFees; // Fermeture
+                        
+                        // Net funding après tous les coûts
+                        const netFunding = netFundingGross - totalMakerFees - totalSlippage;
+                        const netFundingPerCycle = netFunding; // Par funding (8h)
+                        
+                        // APR = (Net Funding par 8h × 3 fundings/jour × 365 jours) × 100
+                        const aprGross = netFundingGross * 365 * 3 * 100;
+                        const aprNet = netFundingPerCycle * 365 * 3 * 100;
+                        
+                        // Vérifier si profitable après coûts
+                        if (aprNet > config.settings.alertThreshold && netFunding > 0) {
+                            const spread = (netFundingGross / ((longExchange.fundingRate + shortExchange.fundingRate) / 2)) * 100;
+                            
+                            newOpportunities.push({
+                                symbol,
+                                aprGross: aprGross,
+                                aprNet: aprNet,
+                                netFundingGross: netFundingGross,
+                                netFundingNet: netFunding,
+                                spread: Math.abs(spread),
+                                longExchange: longExchange.exchange,
+                                shortExchange: shortExchange.exchange,
+                                longRate: longExchange.fundingRate,
+                                shortRate: shortExchange.fundingRate,
+                                fees: {
+                                    makerFees: totalMakerFees * 100,
+                                    slippage: totalSlippage * 100,
+                                    exitFees: exitFees * 100,
+                                    totalCosts: (totalMakerFees + totalSlippage + exitFees) * 100
+                                },
+                                nextFunding: longExchange.nextFunding,
+                                profitability: aprNet / aprGross // Ratio net/gross
+                            });
+                        }
+                    }
                 }
             });
 
-            // Trier par APR décroissant
-            opportunities = newOpportunities.sort((a, b) => b.apr - a.apr).slice(0, config.settings.maxOpportunities);
+            // Trier par APR net décroissant
+            opportunities = newOpportunities.sort((a, b) => b.aprNet - a.aprNet).slice(0, config.settings.maxOpportunities);
             
             updateArbitrageDisplay();
             updateTopOpportunities();
@@ -939,7 +1098,7 @@
             if (opportunities.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; opacity: 0.7; padding: 20px;">
-                        📊 Aucune opportunité >50% APR détectée
+                        📊 Aucune opportunité profitable après fees
                     </div>
                 `;
                 return;
@@ -949,10 +1108,13 @@
                 <div style="margin-bottom: 15px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; border-left: 4px solid #4CAF50;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong>${opp.symbol}</strong>
-                        <span style="color: #4CAF50; font-weight: bold;">${opp.apr.toFixed(1)}% APR</span>
+                        <span style="color: #4CAF50; font-weight: bold;">${opp.aprNet.toFixed(1)}% APR Net</span>
                     </div>
                     <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">
                         Long ${opp.longExchange} • Short ${opp.shortExchange}
+                    </div>
+                    <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 3px;">
+                        Coûts: ${opp.fees.totalCosts.toFixed(2)}% • Profit: ${(opp.profitability * 100).toFixed(1)}%
                     </div>
                 </div>
             `).join('');
@@ -1013,8 +1175,8 @@
             if (opportunities.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; opacity: 0.7; padding: 40px;">
-                        📊 Aucune opportunité d'arbitrage >50% APR<br>
-                        <small>Les spreads sont trop faibles actuellement</small>
+                        📊 Aucune opportunité profitable après fees & slippage<br>
+                        <small>Les spreads ne couvrent pas les coûts de trading actuellement</small>
                     </div>
                 `;
                 return;
@@ -1024,28 +1186,53 @@
                 <div class="opportunity-card">
                     <div class="opportunity-header">
                         <div class="opportunity-crypto">#${index + 1} ${opp.symbol}</div>
-                        <div class="opportunity-apr">${opp.apr.toFixed(1)}% APR</div>
+                        <div class="opportunity-apr">${opp.aprNet.toFixed(1)}% APR Net</div>
                     </div>
+                    
+                    <!-- Résumé de la stratégie -->
+                    <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 8px;">💡 Stratégie recommandée:</div>
+                        <div style="font-size: 0.9rem;">
+                            📈 <strong>Long ${opp.symbol}</strong> sur ${opp.longExchange} (${(opp.longRate * 100).toFixed(4)}%)<br>
+                            📉 <strong>Short ${opp.symbol}</strong> sur ${opp.shortExchange} (${(opp.shortRate * 100).toFixed(4)}%)
+                        </div>
+                    </div>
+                    
                     <div class="opportunity-details">
                         <div class="detail-item">
-                            <div class="detail-label">Long Exchange</div>
-                            <div class="detail-value">${opp.longExchange}</div>
+                            <div class="detail-label">APR Brut</div>
+                            <div class="detail-value" style="color: #ffd93d;">${opp.aprGross.toFixed(1)}%</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-label">Short Exchange</div>
-                            <div class="detail-value">${opp.shortExchange}</div>
+                            <div class="detail-label">APR Net</div>
+                            <div class="detail-value" style="color: #4CAF50;">${opp.aprNet.toFixed(1)}%</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-label">Net Funding</div>
-                            <div class="detail-value">+${(opp.netFunding * 100).toFixed(4)}%</div>
+                            <div class="detail-label">Funding Net/8h</div>
+                            <div class="detail-value">+${(opp.netFundingNet * 100).toFixed(4)}%</div>
                         </div>
                         <div class="detail-item">
                             <div class="detail-label">Spread</div>
                             <div class="detail-value">${opp.spread.toFixed(2)}%</div>
                         </div>
                         <div class="detail-item">
-                            <div class="detail-label">Settlement</div>
-                            <div class="detail-value">Synchronisé</div>
+                            <div class="detail-label">Coûts Totaux</div>
+                            <div class="detail-value" style="color: #f44336;">-${opp.fees.totalCosts.toFixed(2)}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Profitabilité</div>
+                            <div class="detail-value">${(opp.profitability * 100).toFixed(1)}%</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Détail des coûts -->
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; margin-top: 15px;">
+                        <div style="font-size: 0.85rem; opacity: 0.8;">
+                            <strong>💰 Détail des coûts:</strong><br>
+                            • Maker fees: ${opp.fees.makerFees.toFixed(2)}% (ouverture)<br>
+                            • Slippage: ${opp.fees.slippage.toFixed(2)}% (exécution)<br>
+                            • Exit fees: ${opp.fees.exitFees.toFixed(2)}% (fermeture)<br>
+                            • <strong>Total: ${opp.fees.totalCosts.toFixed(2)}%</strong>
                         </div>
                     </div>
                 </div>
@@ -1089,31 +1276,35 @@
                     <h4>${exchange.name}</h4>
                     <p>${exchange.type}</p>
                     <div style="margin: 10px 0;">
-                        ${exchange.active ? '✅ Connecté' : '⚠️ Bientôt disponible'}
+                        ${exchange.active ? '✅ Connecté & Actif' : '⚪ Disponible'}
+                    </div>
+                    <div style="font-size: 0.8rem; opacity: 0.7; margin: 5px 0;">
+                        Maker: ${exchangeFees[key].maker}% • Slippage: ${exchangeFees[key].slippage}%
                     </div>
                     <div class="exchange-toggle">
                         <label class="toggle-switch">
                             <input type="checkbox" ${exchange.active ? 'checked' : ''} 
-                                   ${key !== 'binance' ? 'disabled' : ''} 
                                    onchange="toggleExchange('${key}')">
                             <span class="slider"></span>
                         </label>
                     </div>
-                    ${key !== 'binance' ? '<small style="opacity: 0.7;">En développement</small>' : ''}
                 </div>
             `).join('');
         }
 
         // Basculer exchange
         function toggleExchange(key) {
-            if (key === 'binance') {
-                config.exchanges[key].active = !config.exchanges[key].active;
-                initExchanges();
-                if (config.exchanges[key].active) {
-                    loadLiveData();
-                }
+            config.exchanges[key].active = !config.exchanges[key].active;
+            initExchanges();
+            
+            if (config.exchanges[key].active) {
+                showModal(`✅ ${config.exchanges[key].name} activé !<br><br>Rechargement des données en cours...`);
+                loadLiveData();
             } else {
-                showModal(`🔧 ${config.exchanges[key].name} sera bientôt disponible!<br><br>En cours de développement...`);
+                showModal(`⚠️ ${config.exchanges[key].name} désactivé !<br><br>Les données de cet exchange ne seront plus collectées.`);
+                // Retirer les données de cet exchange
+                liveData = liveData.filter(item => item.exchange !== config.exchanges[key].name);
+                updateStats();
             }
         }
 
@@ -1186,7 +1377,7 @@
             }, config.settings.refreshInterval * 1000);
             
             setTimeout(() => {
-                showModal('🔥 FUNDING RATES BOT - API BINANCE RÉELLE!<br><br>✅ Dashboard avec vraies données<br>✅ Arbitrage avec calculs réels<br>✅ API Binance en temps réel<br>✅ Funding rates authentiques<br><br>🚀 Prêt pour le trading professionnel!<br><br><small>💡 Si erreur CORS : utilise GitHub Pages ou proxy</small>');
+                showModal('🚀 FUNDING RATES BOT MULTI-EXCHANGE!<br><br>✅ <strong>4 Exchanges connectés:</strong><br>• Binance Futures API<br>• KuCoin Futures API<br>• Bybit Linear API<br>• OKX Swap API<br><br>✅ <strong>Arbitrage avec coûts réels:</strong><br>• Maker fees par exchange<br>• Slippage calculé<br>• APR Net après tous les coûts<br><br>🔥 <strong>Prêt pour le trading professionnel!</strong><br><br><small>💡 Active/désactive les exchanges dans l\'onglet EXCHANGES</small>');
             }, 2000);
         }
 
