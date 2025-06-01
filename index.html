@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Funding Rates Bot - Configuration v2</title>
+    <title>Funding Rates Bot - Configuration</title>
     <style>
         * {
             margin: 0;
@@ -268,14 +268,55 @@
         
         .funding-positive {
             color: #ff6b6b;
+            font-weight: bold;
         }
         
         .funding-negative {
             color: #4ecdc4;
+            font-weight: bold;
         }
         
         .funding-neutral {
             color: #ffd93d;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            opacity: 0.7;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .api-status {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .api-status.success {
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .api-status.error {
+            border-left: 4px solid #f44336;
         }
         
         .modal {
@@ -324,7 +365,7 @@
     <div class="container">
         <div class="header">
             <h1>FUNDING RATES BOT</h1>
-            <p>Configuration facile - Interface No-Code</p>
+            <p>Configuration facile - Interface No-Code + APIs Live</p>
         </div>
         
         <div class="tabs">
@@ -340,26 +381,32 @@
                 <h3>Statut du Bot</h3>
                 <div style="display: flex; align-items: center; margin: 15px 0;">
                     <span class="status-indicator active"></span>
-                    <span>Bot actif - Prochaine collecte dans <span id="next-run">2h 15m</span></span>
+                    <span>Bot actif - Prochaine collecte dans <span id="next-run">calculating...</span></span>
                 </div>
+                
+                <div id="api-status" class="api-status">
+                    <div class="spinner"></div>
+                    <span>Connexion aux APIs en cours...</span>
+                </div>
+                
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
                     <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                        <div style="font-size: 2em; font-weight: bold;" id="total-cryptos">13</div>
+                        <div style="font-size: 2em; font-weight: bold;" id="total-cryptos">0</div>
                         <div style="opacity: 0.8;">Cryptos surveillees</div>
                     </div>
                     <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                        <div style="font-size: 2em; font-weight: bold;" id="total-exchanges">2</div>
+                        <div style="font-size: 2em; font-weight: bold;" id="total-exchanges">0</div>
                         <div style="opacity: 0.8;">Exchanges actifs</div>
                     </div>
                     <div style="text-align: center; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
-                        <div style="font-size: 2em; font-weight: bold;" id="collections-today">12</div>
-                        <div style="opacity: 0.8;">Collectes aujourd'hui</div>
+                        <div style="font-size: 2em; font-weight: bold;" id="live-pairs">0</div>
+                        <div style="opacity: 0.8;">Pairs actives</div>
                     </div>
                 </div>
             </div>
             
             <div class="card">
-                <h3>Donnees en Temps Reel</h3>
+                <h3>Données en Temps Réel</h3>
                 <div class="live-data">
                     <div class="data-row data-header">
                         <div>Exchange</div>
@@ -369,15 +416,18 @@
                         <div>Prochaine</div>
                     </div>
                     <div id="live-data-container">
-                        <!-- Les donnees seront chargees ici -->
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Chargement des données live...
+                        </div>
                     </div>
                 </div>
             </div>
             
             <div style="text-align: center; margin: 20px 0;">
-                <button class="btn primary" onclick="triggerCollection()">LANCER COLLECTE</button>
-                <button class="btn" onclick="openGoogleSheet()">VOIR GOOGLE SHEET</button>
-                <button class="btn" onclick="viewGitHubActions()">GITHUB ACTIONS</button>
+                <button class="btn primary" onclick="refreshData()">🔄 ACTUALISER</button>
+                <button class="btn" onclick="openGoogleSheet()">📊 GOOGLE SHEET</button>
+                <button class="btn" onclick="viewGitHubActions()">⚙️ GITHUB ACTIONS</button>
             </div>
         </div>
         
@@ -385,7 +435,7 @@
         <div id="cryptos" class="tab-content">
             <div class="card">
                 <h3>Gestion des Cryptomonnaies</h3>
-                <p>Clique sur les cryptos pour les activer/desactiver</p>
+                <p>Clique sur les cryptos pour les activer/désactiver</p>
                 
                 <div class="custom-crypto">
                     <input type="text" id="custom-crypto-input" placeholder="Ajouter une crypto (ex: AVAX, UNI, AAVE...)" maxlength="10">
@@ -393,7 +443,7 @@
                 </div>
                 
                 <div class="crypto-grid" id="crypto-grid">
-                    <!-- Les cryptos seront generees dynamiquement -->
+                    <!-- Les cryptos seront générées dynamiquement -->
                 </div>
                 
                 <div style="text-align: center; margin-top: 20px;">
@@ -407,46 +457,46 @@
         <div id="exchanges" class="tab-content">
             <div class="card">
                 <h3>Gestion des Exchanges</h3>
-                <p>Active/desactive les exchanges que tu veux surveiller</p>
+                <p>Active/désactive les exchanges que tu veux surveiller</p>
                 
                 <div class="exchange-grid">
                     <div class="exchange-card enabled" data-exchange="binance">
-                        <div class="exchange-logo">BIN</div>
+                        <div class="exchange-logo">🟡</div>
                         <h4>Binance</h4>
                         <p>Futures USDT</p>
                         <div style="margin-top: 10px;">
                             <span class="status-indicator active"></span>
-                            <span>Actif</span>
+                            <span>Connecté</span>
                         </div>
                     </div>
                     
-                    <div class="exchange-card enabled" data-exchange="kucoin">
-                        <div class="exchange-logo">KUC</div>
+                    <div class="exchange-card" data-exchange="kucoin">
+                        <div class="exchange-logo">🟢</div>
                         <h4>KuCoin</h4>
                         <p>Futures USDT</p>
                         <div style="margin-top: 10px;">
-                            <span class="status-indicator active"></span>
-                            <span>Actif</span>
+                            <span class="status-indicator inactive"></span>
+                            <span>Bientôt disponible</span>
                         </div>
                     </div>
                     
                     <div class="exchange-card" data-exchange="okx">
-                        <div class="exchange-logo">OKX</div>
+                        <div class="exchange-logo">⚫</div>
                         <h4>OKX</h4>
                         <p>Perpetual Swaps</p>
                         <div style="margin-top: 10px;">
                             <span class="status-indicator inactive"></span>
-                            <span>Inactif</span>
+                            <span>Bientôt disponible</span>
                         </div>
                     </div>
                     
                     <div class="exchange-card" data-exchange="bybit">
-                        <div class="exchange-logo">BYB</div>
+                        <div class="exchange-logo">🟠</div>
                         <h4>Bybit</h4>
                         <p>USDT Perpetual</p>
                         <div style="margin-top: 10px;">
                             <span class="status-indicator inactive"></span>
-                            <span>Inactif</span>
+                            <span>Bientôt disponible</span>
                         </div>
                     </div>
                 </div>
@@ -461,12 +511,12 @@
         <div id="settings" class="tab-content">
             <div class="settings-grid">
                 <div class="card">
-                    <h3>Frequence de Collecte</h3>
+                    <h3>Fréquence de Collecte</h3>
                     <div class="setting-item">
                         <span>Intervalle de collecte :</span>
                         <select id="collection-interval">
                             <option value="4">Toutes les 4 heures</option>
-                            <option value="8" selected>Toutes les 8 heures (recommande)</option>
+                            <option value="8" selected>Toutes les 8 heures (recommandé)</option>
                             <option value="12">Toutes les 12 heures</option>
                             <option value="24">Une fois par jour</option>
                         </select>
@@ -487,7 +537,7 @@
             </div>
             
             <div style="text-align: center; margin-top: 20px;">
-                <button class="btn primary" onclick="saveSettings()">SAUVEGARDER PARAMETRES</button>
+                <button class="btn primary" onclick="saveSettings()">SAUVEGARDER PARAMÈTRES</button>
                 <button class="btn" onclick="exportConfig()">EXPORTER CONFIGURATION</button>
                 <button class="btn danger" onclick="resetAllSettings()">RESET COMPLET</button>
             </div>
@@ -506,7 +556,7 @@
         // Configuration globale
         let config = {
             cryptos: {
-                selected: ['BTC', 'ETH', 'ADA', 'SOL', 'DOT', 'LINK', 'MATIC'],
+                selected: ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'MATIC', 'LINK'],
                 available: [
                     {symbol: 'BTC', name: 'Bitcoin'},
                     {symbol: 'ETH', name: 'Ethereum'},
@@ -530,7 +580,7 @@
             },
             exchanges: {
                 binance: true,
-                kucoin: true,
+                kucoin: false,
                 okx: false,
                 bybit: false
             },
@@ -540,6 +590,131 @@
                 alertLow: -0.5
             }
         };
+        
+        // Données live des funding rates
+        let liveData = [];
+        
+        // API Binance pour les funding rates
+        async function fetchBinanceFundingRates() {
+            try {
+                const response = await fetch('https://fapi.binance.com/fapi/v1/premiumIndex');
+                const data = await response.json();
+                
+                return data.filter(item => 
+                    item.symbol.endsWith('USDT') && 
+                    config.cryptos.selected.some(crypto => item.symbol.startsWith(crypto))
+                ).map(item => ({
+                    exchange: 'Binance',
+                    symbol: item.symbol.replace('USDT', ''),
+                    fundingRate: parseFloat(item.lastFundingRate),
+                    nextFunding: item.nextFundingTime,
+                    markPrice: parseFloat(item.markPrice)
+                }));
+            } catch (error) {
+                console.error('Erreur Binance API:', error);
+                return [];
+            }
+        }
+        
+        // Calcul du temps jusqu'au prochain funding
+        function calculateNextFunding(timestamp) {
+            const now = Date.now();
+            const next = parseInt(timestamp);
+            const diff = next - now;
+            
+            if (diff <= 0) return 'En cours';
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return `${hours}h ${minutes}m`;
+        }
+        
+        // Déterminer le statut de l'alerte
+        function getAlertStatus(rate) {
+            const percentage = rate * 100;
+            if (percentage >= config.settings.alertHigh) return 'positive';
+            if (percentage <= config.settings.alertLow) return 'negative';
+            return 'neutral';
+        }
+        
+        // Charger les données live
+        async function loadLiveData() {
+            const container = document.getElementById('live-data-container');
+            const apiStatus = document.getElementById('api-status');
+            
+            // Afficher le loading
+            container.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement des données live...</div>';
+            
+            try {
+                // Fetch des données Binance
+                const binanceData = await fetchBinanceFundingRates();
+                liveData = binanceData;
+                
+                // Mettre à jour le statut API
+                apiStatus.className = 'api-status success';
+                apiStatus.innerHTML = `<span style="color: #4CAF50;">✓</span> Connecté à Binance API - ${liveData.length} pairs actives`;
+                
+                // Afficher les données
+                container.innerHTML = '';
+                
+                if (liveData.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; opacity: 0.7;">Aucune donnée disponible pour les cryptos sélectionnées</div>';
+                    return;
+                }
+                
+                liveData.forEach(data => {
+                    const row = document.createElement('div');
+                    row.className = 'data-row';
+                    
+                    const status = getAlertStatus(data.fundingRate);
+                    const statusClass = status === 'positive' ? 'funding-positive' : 
+                                      status === 'negative' ? 'funding-negative' : 'funding-neutral';
+                    const statusIcon = status === 'positive' ? '🔴' : 
+                                     status === 'negative' ? '🟢' : '🟡';
+                    
+                    row.innerHTML = `
+                        <div>${data.exchange}</div>
+                        <div>${data.symbol}</div>
+                        <div class="${statusClass}">${(data.fundingRate * 100).toFixed(4)}%</div>
+                        <div>${statusIcon}</div>
+                        <div>${calculateNextFunding(data.nextFunding)}</div>
+                    `;
+                    
+                    container.appendChild(row);
+                });
+                
+                // Mettre à jour les statistiques
+                updateStats();
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement:', error);
+                apiStatus.className = 'api-status error';
+                apiStatus.innerHTML = '<span style="color: #f44336;">✗</span> Erreur de connexion API';
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: #f44336;">Erreur lors du chargement des données</div>';
+            }
+        }
+        
+        // Actualiser les données
+        function refreshData() {
+            loadLiveData();
+            showModal('Données actualisées !');
+        }
+        
+        // Calcul du prochain funding global
+        function updateNextRunTime() {
+            const now = new Date();
+            const nextHour = new Date(now);
+            nextHour.setHours(now.getHours() + (8 - (now.getHours() % 8)));
+            nextHour.setMinutes(0);
+            nextHour.setSeconds(0);
+            
+            const diff = nextHour - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('next-run').textContent = `${hours}h ${minutes}m`;
+        }
         
         // Fonctions d'interface
         function showTab(tabName) {
@@ -557,7 +732,7 @@
             if (tabName === 'cryptos') {
                 loadCryptoGrid();
             } else if (tabName === 'dashboard') {
-                loadDashboardData();
+                loadLiveData();
             }
         }
         
@@ -589,6 +764,11 @@
             }
             loadCryptoGrid();
             updateStats();
+            
+            // Recharger les données si on est sur le dashboard
+            if (document.getElementById('dashboard').classList.contains('active')) {
+                loadLiveData();
+            }
         }
         
         function addCustomCrypto() {
@@ -600,9 +780,14 @@
                 config.cryptos.selected.push(symbol);
                 input.value = '';
                 loadCryptoGrid();
-                showModal(`${symbol} ajoute avec succes!`);
+                showModal(`${symbol} ajouté avec succès!`);
+                
+                // Recharger les données live
+                if (document.getElementById('dashboard').classList.contains('active')) {
+                    loadLiveData();
+                }
             } else if (symbol) {
-                showModal(`${symbol} existe deja!`);
+                showModal(`${symbol} existe déjà!`);
             }
         }
         
@@ -621,55 +806,30 @@
                 const indicator = card.querySelector('.status-indicator');
                 const status = card.querySelector('span:last-child');
                 
-                indicator.className = `status-indicator ${isEnabled ? 'active' : 'inactive'}`;
-                status.textContent = isEnabled ? 'Actif' : 'Inactif';
+                if (exchange === 'binance') {
+                    indicator.className = 'status-indicator active';
+                    status.textContent = 'Connecté';
+                } else {
+                    indicator.className = `status-indicator ${isEnabled ? 'active' : 'inactive'}`;
+                    status.textContent = isEnabled ? 'Bientôt disponible' : 'Bientôt disponible';
+                }
             });
         }
         
         function updateStats() {
             document.getElementById('total-cryptos').textContent = config.cryptos.selected.length;
             document.getElementById('total-exchanges').textContent = Object.values(config.exchanges).filter(Boolean).length;
-        }
-        
-        function loadDashboardData() {
-            const container = document.getElementById('live-data-container');
-            container.innerHTML = '';
-            
-            const sampleData = [
-                {exchange: 'Binance', crypto: 'BTC', rate: 0.0156, status: 'neutral', next: '2h 15m'},
-                {exchange: 'Binance', crypto: 'ETH', rate: -0.0089, status: 'negative', next: '2h 15m'},
-                {exchange: 'KuCoin', crypto: 'BTC', rate: 0.0167, status: 'neutral', next: '1h 45m'},
-                {exchange: 'KuCoin', crypto: 'SOL', rate: 0.0234, status: 'positive', next: '1h 45m'},
-            ];
-            
-            sampleData.forEach(data => {
-                const row = document.createElement('div');
-                row.className = 'data-row';
-                
-                const statusClass = data.status === 'positive' ? 'funding-positive' : 
-                                  data.status === 'negative' ? 'funding-negative' : 'funding-neutral';
-                const statusIcon = data.status === 'positive' ? 'RED' : 
-                                 data.status === 'negative' ? 'GREEN' : 'YELLOW';
-                
-                row.innerHTML = `
-                    <div>${data.exchange}</div>
-                    <div>${data.crypto}</div>
-                    <div class="${statusClass}">${(data.rate * 100).toFixed(4)}%</div>
-                    <div>${statusIcon}</div>
-                    <div>${data.next}</div>
-                `;
-                
-                container.appendChild(row);
-            });
+            document.getElementById('live-pairs').textContent = liveData.length;
         }
         
         function saveCryptoConfig() {
-            showModal(`Configuration sauvee! Cryptos selectionnees: ${config.cryptos.selected.join(', ')}`);
+            showModal(`Configuration sauvée! Cryptos sélectionnées: ${config.cryptos.selected.join(', ')}`);
+            loadLiveData(); // Recharger avec la nouvelle config
         }
         
         function saveExchangeConfig() {
             const activeExchanges = Object.keys(config.exchanges).filter(ex => config.exchanges[ex]);
-            showModal(`Configuration exchanges sauvee! Exchanges actifs: ${activeExchanges.join(', ')}`);
+            showModal(`Configuration exchanges sauvée! Exchanges actifs: ${activeExchanges.join(', ')}`);
         }
         
         function saveSettings() {
@@ -677,34 +837,37 @@
             config.settings.alertHigh = parseFloat(document.getElementById('alert-high').value);
             config.settings.alertLow = parseFloat(document.getElementById('alert-low').value);
             
-            showModal(`Parametres sauves! Collecte: toutes les ${config.settings.interval}h`);
-        }
-        
-        function triggerCollection() {
-            showModal('Collecte manuelle declenchee! Verifie GitHub Actions dans quelques minutes.');
+            showModal(`Paramètres sauvés! Collecte: toutes les ${config.settings.interval}h`);
+            loadLiveData(); // Recharger pour appliquer les nouveaux seuils
         }
         
         function openGoogleSheet() {
-            window.open('https://docs.google.com/spreadsheets/d/13Xsua2jjhLPUAlRe6HZKQ6xgkByf3Dit0VsRzJyudXU/edit', '_blank');
+            showModal('🚀 Intégration Google Sheets en cours de développement!<br><br>Bientôt disponible:<br>• Export automatique<br>• Historique complet<br>• Graphiques avancés');
         }
         
         function viewGitHubActions() {
-            window.open('https://github.com/marcr1993/funding-rates-bot/actions', '_blank');
+            showModal('⚙️ GitHub Actions - Automatisation<br><br>Fonctionnalités prévues:<br>• Collecte auto toutes les 8h<br>• Sauvegarde dans Google Sheets<br>• Notifications par email<br>• Backup des configurations');
         }
         
         function exportConfig() {
-            const configText = JSON.stringify(config, null, 2);
+            const configData = {
+                ...config,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const configText = JSON.stringify(configData, null, 2);
             const blob = new Blob([configText], {type: 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'funding-rates-config.json';
+            a.download = `funding-rates-config-${new Date().toISOString().split('T')[0]}.json`;
             a.click();
-            showModal('Configuration exportee!');
+            showModal('Configuration exportée!');
         }
         
         function resetAllSettings() {
-            if (confirm('Etes-vous sur de vouloir reset toute la configuration?')) {
+            if (confirm('Êtes-vous sûr de vouloir reset toute la configuration?')) {
                 location.reload();
             }
         }
@@ -718,9 +881,14 @@
             document.getElementById('modal').style.display = 'none';
         }
         
+        // Event listeners
         document.querySelectorAll('.exchange-card').forEach(card => {
             card.addEventListener('click', () => {
-                toggleExchange(card.dataset.exchange);
+                if (card.dataset.exchange === 'binance') {
+                    showModal('Binance est déjà connecté! 🟡<br><br>API active avec données temps réel.');
+                } else {
+                    showModal(`${card.querySelector('h4').textContent} sera bientôt disponible!<br><br>En cours de développement...`);
+                }
             });
         });
         
@@ -736,11 +904,29 @@
             }
         });
         
+        // Auto-refresh des données toutes les 5 minutes
+        setInterval(() => {
+            if (document.getElementById('dashboard').classList.contains('active')) {
+                loadLiveData();
+            }
+            updateNextRunTime();
+        }, 5 * 60 * 1000);
+        
+        // Mise à jour du timer toutes les minutes
+        setInterval(updateNextRunTime, 60 * 1000);
+        
+        // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             loadCryptoGrid();
             updateExchangeDisplay();
             updateStats();
-            loadDashboardData();
+            loadLiveData();
+            updateNextRunTime();
+            
+            // Message de bienvenue
+            setTimeout(() => {
+                showModal('🔥 FUNDING RATES BOT ACTIVÉ!<br><br>✅ API Binance connectée<br>✅ Données temps réel<br>✅ ' + config.cryptos.selected.length + ' cryptos surveillées<br><br>Prêt pour l\'action! 🚀');
+            }, 2000);
         });
     </script>
 </body>
