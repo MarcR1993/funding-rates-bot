@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funding Rates Monitor</title>
+    <title>Funding Rates Monitor - Clone Coinglass</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         * {
@@ -13,17 +13,20 @@
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #0b0f19;
             color: #ffffff;
-            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.4;
         }
 
         .header {
-            background: linear-gradient(135deg, #1e2751 0%, #2d3561 100%);
-            padding: 20px 0;
-            border-bottom: 1px solid #2a2f4a;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            background: #141920;
+            border-bottom: 1px solid #1e2329;
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header-content {
@@ -33,64 +36,59 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #f0b90b;
         }
 
-        .logo h1 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #ffd700, #ffa500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-header {
+            background: #1e2329;
+            border: 1px solid #2b3139;
+            color: #eaecef;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-header:hover {
+            background: #2b3139;
+            border-color: #f0b90b;
+        }
+
+        .btn-header.active {
+            background: #f0b90b;
+            color: #000;
+            border-color: #f0b90b;
         }
 
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            gap: 6px;
+            font-size: 11px;
+            color: #76808f;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #00ff88;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
+            background: #0ecb81;
             animation: pulse 2s infinite;
-        }
-
-        .status-warning {
-            background: rgba(251, 191, 36, 0.1);
-            border-color: #fbbf24;
-        }
-
-        .status-warning .status-dot {
-            background: #fbbf24;
-        }
-
-        .status-error {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: #ef4444;
-        }
-
-        .status-error .status-dot {
-            background: #ef4444;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
         }
 
         .container {
@@ -99,191 +97,339 @@
             padding: 20px;
         }
 
-        .controls-section {
-            background: rgba(26, 31, 46, 0.8);
-            border-radius: 16px;
-            padding: 24px;
+        .page-header {
             margin-bottom: 20px;
-            border: 1px solid #2a2f4a;
         }
 
-        .action-buttons {
+        .page-title {
             display: flex;
+            align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
+            margin-bottom: 8px;
         }
 
-        .btn {
-            padding: 12px 20px;
+        .page-title h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #eaecef;
+        }
+
+        .page-subtitle {
+            color: #76808f;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .controls-bar {
+            background: #141920;
+            border: 1px solid #1e2329;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .controls-grid {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 12px;
+            color: #76808f;
+            font-weight: 500;
+        }
+
+        .toggle-group {
+            display: flex;
+            background: #1e2329;
+            border-radius: 4px;
+            border: 1px solid #2b3139;
+        }
+
+        .toggle-btn {
+            background: none;
             border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            color: #76808f;
+            padding: 6px 12px;
+            font-size: 12px;
             cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.2s;
         }
 
-        .btn-primary {
-            background: linear-gradient(45deg, #4f46e5, #7c3aed);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-secondary {
-            background: #374151;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #4b5563;
-        }
-
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .data-section {
-            background: rgba(26, 31, 46, 0.8);
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid #2a2f4a;
-            position: relative;
-        }
-
-        .section-header {
-            background: rgba(37, 42, 61, 0.8);
-            padding: 16px 20px;
-            border-bottom: 1px solid #2a2f4a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .toggle-btn.active {
+            background: #f0b90b;
+            color: #000;
         }
 
         .search-box {
-            padding: 8px 12px;
-            background: rgba(26, 31, 46, 0.8);
-            border: 1px solid #3d4556;
-            border-radius: 6px;
-            color: white;
-            font-size: 0.85rem;
+            background: #1e2329;
+            border: 1px solid #2b3139;
+            border-radius: 4px;
+            padding: 6px 10px;
+            color: #eaecef;
+            font-size: 12px;
             width: 200px;
         }
 
-        .table-container {
-            overflow-x: auto;
-            max-height: 600px;
+        .search-box::placeholder {
+            color: #76808f;
+        }
+
+        .add-crypto-btn {
+            background: #0ecb81;
+            border: none;
+            color: #000;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .main-table {
+            background: #141920;
+            border: 1px solid #1e2329;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #1e2329;
+            background: #1a1f2a;
+        }
+
+        .table-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #eaecef;
+        }
+
+        .table-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .funding-table {
             width: 100%;
             border-collapse: collapse;
+            background: #141920;
         }
 
         .funding-table th {
-            background: rgba(37, 42, 61, 0.9);
+            background: #1a1f2a;
             padding: 12px 16px;
             text-align: left;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #b0b7c3;
-            border-bottom: 1px solid #3d4556;
+            font-weight: 500;
+            font-size: 12px;
+            color: #76808f;
+            border-bottom: 1px solid #1e2329;
             position: sticky;
             top: 0;
             cursor: pointer;
+            user-select: none;
+        }
+
+        .funding-table th:hover {
+            background: #1e2329;
         }
 
         .funding-table td {
             padding: 12px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 0.9rem;
+            border-bottom: 1px solid #1e2329;
+            font-size: 13px;
+            vertical-align: middle;
         }
 
         .funding-table tr:hover {
-            background: rgba(255, 255, 255, 0.02);
+            background: #1a1f2a;
         }
 
-        .crypto-info {
+        .ranking-cell {
+            color: #76808f;
+            font-weight: 500;
+            width: 60px;
+        }
+
+        .symbol-cell {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            min-width: 120px;
         }
 
         .crypto-icon {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #ffd700, #ffa500);
+            background: linear-gradient(135deg, #f0b90b, #fcd535);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
+            font-size: 10px;
             font-weight: bold;
             color: #000;
         }
 
-        .exchange-badge {
-            padding: 4px 8px;
-            background: rgba(79, 70, 229, 0.2);
-            border: 1px solid #4f46e5;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #a5b4fc;
+        .symbol-info {
+            display: flex;
+            flex-direction: column;
         }
 
-        .exchange-binance { border-color: #fbbf24; background: rgba(251, 191, 36, 0.2); color: #fcd34d; }
-        .exchange-bybit { border-color: #10b981; background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .symbol-name {
+            font-weight: 600;
+            color: #eaecef;
+            font-size: 14px;
+        }
 
-        .rate-positive { color: #10b981; font-weight: 600; }
-        .rate-negative { color: #ef4444; font-weight: 600; }
-        .rate-neutral { color: #6b7280; }
+        .portfolio-cell {
+            min-width: 200px;
+        }
 
-        .loading-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(26, 31, 46, 0.95);
+        .position-long {
+            color: #0ecb81;
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+
+        .position-short {
+            color: #f6465d;
+            font-size: 12px;
+        }
+
+        .exchange-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-right: 6px;
+        }
+
+        .badge-binance {
+            background: rgba(240, 185, 11, 0.1);
+            color: #f0b90b;
+            border: 1px solid rgba(240, 185, 11, 0.2);
+        }
+
+        .badge-bybit {
+            background: rgba(14, 203, 129, 0.1);
+            color: #0ecb81;
+            border: 1px solid rgba(14, 203, 129, 0.2);
+        }
+
+        .badge-okx {
+            background: rgba(13, 132, 242, 0.1);
+            color: #0d84f2;
+            border: 1px solid rgba(13, 132, 242, 0.2);
+        }
+
+        .apr-positive {
+            color: #0ecb81;
+            font-weight: 600;
+        }
+
+        .apr-negative {
+            color: #f6465d;
+            font-weight: 600;
+        }
+
+        .rate-positive {
+            color: #0ecb81;
+            font-weight: 500;
+        }
+
+        .rate-negative {
+            color: #f6465d;
+            font-weight: 500;
+        }
+
+        .spread-positive {
+            color: #0ecb81;
+        }
+
+        .spread-negative {
+            color: #f6465d;
+        }
+
+        .open-interest {
+            color: #eaecef;
+            font-weight: 500;
+        }
+
+        .settlement-time {
+            color: #76808f;
+            font-size: 12px;
+        }
+
+        .trade-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .trade-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: none;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            gap: 16px;
-            z-index: 100;
+            font-size: 10px;
+            transition: all 0.2s;
+        }
+
+        .trade-btn.binance {
+            background: rgba(240, 185, 11, 0.1);
+            color: #f0b90b;
+            border: 1px solid rgba(240, 185, 11, 0.3);
+        }
+
+        .trade-btn.bybit {
+            background: rgba(14, 203, 129, 0.1);
+            color: #0ecb81;
+            border: 1px solid rgba(14, 203, 129, 0.3);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 15, 25, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
         }
 
         .spinner {
-            width: 40px; height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-left: 3px solid #4f46e5;
+            width: 32px;
+            height: 32px;
+            border: 2px solid rgba(240, 185, 11, 0.1);
+            border-left: 2px solid #f0b90b;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
@@ -293,15 +439,37 @@
             100% { transform: rotate(360deg); }
         }
 
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #9ca3af;
+            color: #76808f;
+        }
+
+        .sort-indicator {
+            margin-left: 4px;
+            opacity: 0.5;
         }
 
         @media (max-width: 768px) {
-            .header-content { flex-direction: column; }
-            .search-box { width: 100%; }
+            .controls-grid {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            
+            .funding-table {
+                font-size: 12px;
+            }
+            
+            .funding-table th,
+            .funding-table td {
+                padding: 8px 12px;
+            }
         }
     </style>
 </head>
@@ -309,76 +477,133 @@
     <div class="header">
         <div class="header-content">
             <div class="logo">
-                <i class="fas fa-chart-line" style="color: #ffd700; font-size: 1.5rem;"></i>
-                <h1>Funding Rates Monitor</h1>
+                <i class="fas fa-chart-line"></i>
+                Funding Rates Monitor
             </div>
-            
-            <div class="status-indicator" id="status-indicator">
-                <div class="status-dot"></div>
-                <span id="connection-status">Connexion...</span>
+            <div class="header-controls">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span id="connection-status">Connecting...</span>
+                </div>
+                <button class="btn-header" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn-header" onclick="exportData()">
+                    <i class="fas fa-download"></i> Export
+                </button>
             </div>
         </div>
     </div>
 
     <div class="container">
-        <div class="controls-section">
-            <div class="action-buttons">
-                <button class="btn btn-primary" id="refresh-btn" onclick="smartRefresh()">
-                    <i class="fas fa-sync-alt"></i>
-                    <span id="refresh-text">Actualiser</span>
-                </button>
-                <button class="btn btn-success" onclick="wakeUpBackend()">
-                    <i class="fas fa-coffee"></i>
-                    Réveiller Backend
-                </button>
-                <button class="btn btn-warning" onclick="testAllEndpoints()">
-                    <i class="fas fa-stethoscope"></i>
-                    Diagnostics
-                </button>
-                <a href="https://funding-rates-backend.onrender.com" target="_blank" class="btn btn-secondary">
-                    <i class="fas fa-external-link-alt"></i>
-                    Voir Backend
-                </a>
+        <div class="page-header">
+            <div class="page-title">
+                <h1>🎯 Funding Rate Arbitrage</h1>
+            </div>
+            <div class="page-subtitle">
+                Real-time funding rates comparison across multiple exchanges for cryptocurrency perpetual contracts
             </div>
         </div>
 
-        <div class="data-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-table"></i>
-                    <span>Funding Rates en Temps Réel</span>
-                    <span id="last-update"></span>
+        <div class="controls-bar">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <span class="control-label">Contract Type:</span>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" data-type="usdt">USDT Margined</button>
+                        <button class="toggle-btn" data-type="coin">Coin Margined</button>
+                    </div>
                 </div>
-                
-                <input type="text" class="search-box" id="search-input" placeholder="Rechercher crypto..." onkeyup="filterTable()">
+
+                <div class="control-group">
+                    <span class="control-label">Time Frame:</span>
+                    <div class="toggle-group">
+                        <button class="toggle-btn active" data-time="current">Current</button>
+                        <button class="toggle-btn" data-time="1d">1 Day</button>
+                        <button class="toggle-btn" data-time="7d">7 Day</button>
+                        <button class="toggle-btn" data-time="30d">30 Day</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <input type="text" class="search-box" id="search-input" placeholder="Search cryptocurrency..." onkeyup="filterTable()">
+                </div>
+
+                <div class="control-group">
+                    <button class="add-crypto-btn" onclick="showAddCryptoModal()">
+                        <i class="fas fa-plus"></i>
+                        Add Crypto
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-table" style="position: relative;">
+            <div class="table-header">
+                <div class="table-title">
+                    <i class="fas fa-list"></i>
+                    Exchanges
+                    <span id="data-count" style="color: #76808f; font-size: 12px;">(0)</span>
+                </div>
+                <div class="table-controls">
+                    <button class="btn-header" onclick="toggleAutoRefresh()">
+                        <i class="fas fa-clock"></i>
+                        <span id="auto-refresh-status">Auto (Off)</span>
+                    </button>
+                </div>
             </div>
 
-            <div class="table-container">
-                <table class="funding-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-coins"></i> Crypto</th>
-                            <th><i class="fas fa-exchange-alt"></i> Exchange</th>
-                            <th><i class="fas fa-percentage"></i> Funding Rate</th>
-                            <th><i class="fas fa-dollar-sign"></i> Mark Price</th>
-                            <th><i class="fas fa-chart-line"></i> APR Annuel</th>
-                            <th><i class="fas fa-clock"></i> Timestamp</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body">
-                        <tr>
-                            <td colspan="6" class="empty-state">
-                                <i class="fas fa-info-circle"></i>
-                                Cliquez "Actualiser" pour charger les données
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="funding-table">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('ranking')" style="width: 60px;">
+                            Ranking
+                            <span class="sort-indicator" id="sort-ranking"></span>
+                        </th>
+                        <th onclick="sortTable('symbol')" style="width: 140px;">
+                            Symbol
+                            <span class="sort-indicator" id="sort-symbol"></span>
+                        </th>
+                        <th onclick="sortTable('portfolio')" style="width: 220px;">
+                            Portfolio
+                            <span class="sort-indicator" id="sort-portfolio"></span>
+                        </th>
+                        <th onclick="sortTable('apr')" style="width: 100px; text-align: right;">
+                            APR
+                            <span class="sort-indicator" id="sort-apr"></span>
+                        </th>
+                        <th onclick="sortTable('fundingRate')" style="width: 120px; text-align: right;">
+                            Net Funding Rate
+                            <span class="sort-indicator" id="sort-fundingRate"></span>
+                        </th>
+                        <th onclick="sortTable('spread')" style="width: 100px; text-align: right;">
+                            Spread Rate
+                            <span class="sort-indicator" id="sort-spread"></span>
+                        </th>
+                        <th onclick="sortTable('openInterest')" style="width: 120px; text-align: right;">
+                            Open Interest
+                            <span class="sort-indicator" id="sort-openInterest"></span>
+                        </th>
+                        <th style="width: 100px;">
+                            Settlement
+                        </th>
+                        <th style="width: 80px; text-align: center;">
+                            Trade
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <i class="fas fa-chart-line"></i><br>
+                            Loading funding rates data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
             <div class="loading-overlay" id="loading-overlay" style="display: none;">
                 <div class="spinner"></div>
-                <div id="loading-text">Chargement...</div>
             </div>
         </div>
     </div>
@@ -386,17 +611,19 @@
     <script>
         var BACKEND_URL = 'https://funding-rates-backend.onrender.com';
         var currentData = [];
+        var filteredData = [];
         var isLoading = false;
-        var backendStatus = 'unknown';
+        var autoRefreshInterval = null;
+        var sortConfig = { column: null, direction: 'asc' };
 
-        function updateStatus(message, type) {
-            var indicator = document.getElementById('status-indicator');
-            var statusText = document.getElementById('connection-status');
+        function updateConnectionStatus(message, isOnline) {
+            var statusEl = document.getElementById('connection-status');
+            statusEl.textContent = message;
             
-            indicator.className = 'status-indicator status-' + (type || 'success');
-            statusText.textContent = message;
+            var dot = document.querySelector('.status-dot');
+            dot.style.background = isOnline ? '#0ecb81' : '#f6465d';
             
-            console.log('Status: ' + message);
+            console.log('Status:', message);
         }
 
         function setLoading(loading) {
@@ -405,69 +632,48 @@
             overlay.style.display = loading ? 'flex' : 'none';
         }
 
-        function updateRefreshButton(loading) {
-            var btn = document.getElementById('refresh-btn');
-            var text = document.getElementById('refresh-text');
-            
-            if (loading) {
-                btn.disabled = true;
-                text.textContent = 'Chargement...';
+        function formatNumber(num, decimals = 2) {
+            if (num >= 1000000) {
+                return '$' + (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return '$' + (num / 1000).toFixed(1) + 'K';
             } else {
-                btn.disabled = false;
-                text.textContent = 'Actualiser';
+                return '$' + num.toFixed(decimals);
             }
         }
 
-        function testBackend() {
-            updateStatus('Test de connectivité...', 'warning');
-            
-            fetch(BACKEND_URL + '/api/health', {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(function(response) {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('HTTP ' + response.status);
-                }
-            })
-            .then(function(result) {
-                console.log('Backend actif:', result);
-                backendStatus = 'online';
-                var corsStatus = result.cors_enabled ? ' (CORS OK)' : '';
-                updateStatus('Backend LIVE' + corsStatus, 'success');
-                return true;
-            })
-            .catch(function(error) {
-                console.log('Erreur de connexion:', error.message);
-                
-                if (error.message.includes('Failed to fetch')) {
-                    updateStatus('Erreur CORS - Vérifie le déploiement', 'error');
-                } else {
-                    backendStatus = 'offline';
-                    updateStatus('Backend indisponible', 'error');
-                }
-                return false;
-            });
+        function calculateAPR(fundingRate) {
+            return (fundingRate * 3 * 365 * 100).toFixed(2);
         }
 
-        function smartRefresh() {
+        function getNextSettlement() {
+            var now = new Date();
+            var minutes = now.getMinutes();
+            var nextHour = new Date(now);
+            
+            if (minutes < 0) nextHour.setHours(now.getHours(), 0, 0, 0);
+            else if (minutes < 8) nextHour.setHours(now.getHours(), 8, 0, 0);
+            else if (minutes < 16) nextHour.setHours(now.getHours(), 16, 0, 0);
+            else nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+            
+            var diff = nextHour - now;
+            var hours = Math.floor(diff / (1000 * 60 * 60));
+            var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            
+            return hours.toString().padStart(2, '0') + ':' + mins.toString().padStart(2, '0') + ':' + 
+                   Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        }
+
+        function refreshData() {
             if (isLoading) return;
             
             setLoading(true);
-            updateRefreshButton(true);
-            
-            console.log('Récupération des données...');
+            updateConnectionStatus('Loading...', false);
             
             fetch(BACKEND_URL + '/api/funding-rates', {
                 method: 'GET',
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Accept': 'application/json'
                 }
             })
             .then(function(response) {
@@ -478,184 +684,334 @@
                 }
             })
             .then(function(result) {
-                console.log('Données reçues:', result);
+                console.log('Data received:', result);
                 
                 var fundingData = [];
-                
                 if (result.success && result.data) {
                     fundingData = result.data;
                 } else if (Array.isArray(result)) {
                     fundingData = result;
-                } else if (result.funding_rates) {
-                    fundingData = result.funding_rates;
                 }
                 
                 if (fundingData.length > 0) {
-                    currentData = fundingData;
-                    renderFundingRatesTable(currentData);
+                    currentData = processDataForCoinglass(fundingData);
+                    filteredData = currentData.slice();
+                    renderTable(filteredData);
                     
-                    var corsStatus = result.cors_enabled ? ' (CORS OK)' : '';
-                    updateStatus(fundingData.length + ' rates chargés' + corsStatus, 'success');
-                    backendStatus = 'online';
+                    updateConnectionStatus('Live (' + fundingData.length + ' rates)', true);
+                    document.getElementById('data-count').textContent = '(' + currentData.length + ')';
                     
-                    console.log('✅ ' + fundingData.length + ' funding rates traités');
+                    if (!autoRefreshInterval) {
+                        startAutoRefresh();
+                    }
                 } else {
-                    throw new Error('Aucune donnée trouvée');
+                    throw new Error('No data received');
                 }
             })
             .catch(function(error) {
-                console.error('Erreur lors du refresh:', error);
-                handleRefreshError(error);
+                console.error('Error loading data:', error);
+                updateConnectionStatus('Connection failed', false);
+                
+                if (error.message.includes('Failed to fetch')) {
+                    updateConnectionStatus('CORS Error - Check deployment', false);
+                }
             })
             .finally(function() {
                 setLoading(false);
-                updateRefreshButton(false);
             });
         }
 
-        function handleRefreshError(error) {
-            if (error.message.includes('Failed to fetch')) {
-                updateStatus('Erreur CORS - Redéploiement requis', 'error');
-                console.log('CORS bloqué. Assure-toi que ton backend a les bonnes modifications.');
-            } else if (error.message.includes('HTTP 503') || error.message.includes('HTTP 502')) {
-                backendStatus = 'cold';
-                updateStatus('Backend en réveil...', 'warning');
-                setTimeout(function() { smartRefresh(); }, 15000);
-            } else {
-                updateStatus('Erreur de connexion', 'error');
-                console.log('Erreur:', error.message);
-            }
+        function processDataForCoinglass(rawData) {
+            var symbolGroups = {};
             
-            backendStatus = 'offline';
-        }
-
-        function wakeUpBackend() {
-            updateStatus('Réveil du backend...', 'warning');
-            
-            fetch(BACKEND_URL + '/api/health', {
-                method: 'GET'
-            })
-            .then(function(response) {
-                if (response.ok) {
-                    console.log('Backend réveillé !');
-                    backendStatus = 'online';
-                    updateStatus('Backend réveillé !', 'success');
-                    return true;
-                } else {
-                    throw new Error('HTTP ' + response.status);
+            rawData.forEach(function(item) {
+                var symbol = item.symbol;
+                if (!symbolGroups[symbol]) {
+                    symbolGroups[symbol] = [];
                 }
-            })
-            .catch(function(error) {
-                console.error('Échec du réveil:', error);
-                backendStatus = 'offline';
-                updateStatus('Échec du réveil', 'error');
-                return false;
-            });
-        }
-
-        function testAllEndpoints() {
-            setLoading(true);
-            updateStatus('Test des endpoints...', 'warning');
-            
-            var endpoints = [
-                { name: 'home', url: BACKEND_URL },
-                { name: 'health', url: BACKEND_URL + '/api/health' },
-                { name: 'funding-rates', url: BACKEND_URL + '/api/funding-rates' },
-                { name: 'arbitrage', url: BACKEND_URL + '/api/arbitrage' }
-            ];
-            
-            var promises = endpoints.map(function(endpoint) {
-                return fetch(endpoint.url, { method: 'GET' })
-                    .then(function(response) {
-                        return { name: endpoint.name, status: response.ok };
-                    })
-                    .catch(function() {
-                        return { name: endpoint.name, status: false };
-                    });
+                symbolGroups[symbol].push(item);
             });
             
-            Promise.all(promises)
-                .then(function(results) {
-                    var workingEndpoints = results.filter(function(r) { return r.status; }).length;
-                    var totalEndpoints = results.length;
-                    
-                    var status = workingEndpoints + '/' + totalEndpoints + ' endpoints OK';
-                    updateStatus(status, workingEndpoints === totalEndpoints ? 'success' : 'warning');
-                    
-                    console.log('Résultats des tests:');
-                    results.forEach(function(result) {
-                        console.log('   ' + result.name + ': ' + (result.status ? '✅' : '❌'));
-                    });
-                })
-                .catch(function(error) {
-                    updateStatus('Erreur lors des tests', 'error');
-                    console.error('Erreur tests:', error);
-                })
-                .finally(function() {
-                    setLoading(false);
+            var processed = [];
+            var ranking = 1;
+            
+            Object.keys(symbolGroups).forEach(function(symbol) {
+                var exchanges = symbolGroups[symbol];
+                
+                exchanges.sort(function(a, b) {
+                    return parseFloat(b.fundingRate) - parseFloat(a.fundingRate);
                 });
+                
+                var longExchange = exchanges[exchanges.length - 1];
+                var shortExchange = exchanges[0];
+                
+                var longRate = parseFloat(longExchange.fundingRate);
+                var shortRate = parseFloat(shortExchange.fundingRate);
+                var spreadRate = shortRate - longRate;
+                var apr = calculateAPR(Math.abs(spreadRate));
+                
+                var openInterest = exchanges.reduce(function(sum, ex) {
+                    return sum + (parseFloat(ex.markPrice) || 0) * 1000;
+                }, 0);
+                
+                processed.push({
+                    ranking: ranking++,
+                    symbol: symbol,
+                    longExchange: longExchange,
+                    shortExchange: shortExchange,
+                    apr: parseFloat(apr),
+                    fundingRate: spreadRate,
+                    spreadRate: spreadRate,
+                    openInterest: openInterest,
+                    exchanges: exchanges,
+                    settlement: getNextSettlement()
+                });
+            });
+            
+            processed.sort(function(a, b) {
+                return b.apr - a.apr;
+            });
+            
+            processed.forEach(function(item, index) {
+                item.ranking = index + 1;
+            });
+            
+            return processed;
         }
 
-        function renderFundingRatesTable(data) {
-            var tableBody = document.getElementById('table-body');
+        function renderTable(data) {
+            var tbody = document.getElementById('table-body');
             
             if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-exclamation-circle"></i> Aucune donnée disponible</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state"><i class="fas fa-search"></i><br>No data available</td></tr>';
                 return;
             }
             
             var rows = data.map(function(item) {
-                var fundingRate = parseFloat(item.fundingRate) || 0;
-                var markPrice = parseFloat(item.markPrice) || 0;
-                var annualAPR = (fundingRate * 3 * 365 * 100).toFixed(3);
-                
-                var rateClass = fundingRate > 0 ? 'rate-positive' : 
-                               fundingRate < 0 ? 'rate-negative' : 'rate-neutral';
-                
-                var exchangeClass = 'exchange-' + item.exchange.toLowerCase();
-                
-                var timestamp = new Date(item.timestamp).toLocaleTimeString();
+                var aprClass = item.apr > 0 ? 'apr-positive' : item.apr < 0 ? 'apr-negative' : '';
+                var rateClass = item.fundingRate > 0 ? 'rate-positive' : item.fundingRate < 0 ? 'rate-negative' : '';
+                var spreadClass = item.spreadRate > 0 ? 'spread-positive' : 'spread-negative';
                 
                 return '<tr>' +
-                    '<td><div class="crypto-info"><div class="crypto-icon">' + item.symbol.substring(0, 2) + '</div><strong>' + item.symbol + '</strong></div></td>' +
-                    '<td><span class="exchange-badge ' + exchangeClass + '">' + item.exchange + '</span></td>' +
-                    '<td class="' + rateClass + '">' + (fundingRate * 100).toFixed(4) + '%</td>' +
-                    '<td>$' + markPrice.toFixed(2) + '</td>' +
-                    '<td class="' + rateClass + '">' + annualAPR + '%</td>' +
-                    '<td style="color: #9ca3af; font-size: 0.8rem;">' + timestamp + '</td>' +
+                    '<td class="ranking-cell">' + item.ranking + '</td>' +
+                    '<td class="symbol-cell">' +
+                        '<div class="crypto-icon">' + item.symbol.substring(0, 2) + '</div>' +
+                        '<div class="symbol-info">' +
+                            '<div class="symbol-name">' + item.symbol + '</div>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="portfolio-cell">' +
+                        '<div class="position-long">Long ' + item.symbol + '/USDT <span class="exchange-badge badge-' + item.longExchange.exchange.toLowerCase() + '">' + item.longExchange.exchange + '</span></div>' +
+                        '<div class="position-short">Short ' + item.symbol + '/USDT <span class="exchange-badge badge-' + item.shortExchange.exchange.toLowerCase() + '">' + item.shortExchange.exchange + '</span></div>' +
+                    '</td>' +
+                    '<td style="text-align: right;" class="' + aprClass + '">' + item.apr.toFixed(2) + '%</td>' +
+                    '<td style="text-align: right;" class="' + rateClass + '">' + (item.fundingRate * 100).toFixed(4) + '%</td>' +
+                    '<td style="text-align: right;" class="' + spreadClass + '">' + (item.spreadRate >= 0 ? '+' : '') + (item.spreadRate * 100).toFixed(2) + '%</td>' +
+                    '<td style="text-align: right;" class="open-interest">' + formatNumber(item.openInterest) + '</td>' +
+                    '<td class="settlement-time">' + item.settlement + '</td>' +
+                    '<td style="text-align: center;">' +
+                        '<div class="trade-buttons">' +
+                            '<button class="trade-btn ' + item.longExchange.exchange.toLowerCase() + '" title="Trade on ' + item.longExchange.exchange + '">' +
+                                '<i class="fas fa-external-link-alt"></i>' +
+                            '</button>' +
+                            '<button class="trade-btn ' + item.shortExchange.exchange.toLowerCase() + '" title="Trade on ' + item.shortExchange.exchange + '">' +
+                                '<i class="fas fa-external-link-alt"></i>' +
+                            '</button>' +
+                        '</div>' +
+                    '</td>' +
                 '</tr>';
             }).join('');
             
-            tableBody.innerHTML = rows;
-            
-            var now = new Date().toLocaleTimeString();
-            document.getElementById('last-update').textContent = '(' + now + ')';
+            tbody.innerHTML = rows;
         }
 
         function filterTable() {
             var searchTerm = document.getElementById('search-input').value.toLowerCase();
             
             if (!searchTerm) {
-                renderFundingRatesTable(currentData);
+                filteredData = currentData.slice();
+            } else {
+                filteredData = currentData.filter(function(item) {
+                    return item.symbol.toLowerCase().includes(searchTerm) ||
+                           item.longExchange.exchange.toLowerCase().includes(searchTerm) ||
+                           item.shortExchange.exchange.toLowerCase().includes(searchTerm);
+                });
+            }
+            
+            renderTable(filteredData);
+        }
+
+        function sortTable(column) {
+            if (sortConfig.column === column) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.column = column;
+                sortConfig.direction = 'desc';
+            }
+            
+            document.querySelectorAll('.sort-indicator').forEach(function(el) {
+                el.textContent = '';
+            });
+            
+            var indicator = document.getElementById('sort-' + column);
+            if (indicator) {
+                indicator.textContent = sortConfig.direction === 'asc' ? '↑' : '↓';
+            }
+            
+            filteredData.sort(function(a, b) {
+                var aVal, bVal;
+                
+                switch(column) {
+                    case 'ranking':
+                        aVal = a.ranking;
+                        bVal = b.ranking;
+                        break;
+                    case 'symbol':
+                        aVal = a.symbol;
+                        bVal = b.symbol;
+                        break;
+                    case 'apr':
+                        aVal = a.apr;
+                        bVal = b.apr;
+                        break;
+                    case 'fundingRate':
+                        aVal = a.fundingRate;
+                        bVal = b.fundingRate;
+                        break;
+                    case 'spread':
+                        aVal = a.spreadRate;
+                        bVal = b.spreadRate;
+                        break;
+                    case 'openInterest':
+                        aVal = a.openInterest;
+                        bVal = b.openInterest;
+                        break;
+                    default:
+                        return 0;
+                }
+                
+                if (typeof aVal === 'string') {
+                    return sortConfig.direction === 'asc' ? 
+                        aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                } else {
+                    return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+                }
+            });
+            
+            renderTable(filteredData);
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) return;
+            
+            autoRefreshInterval = setInterval(function() {
+                if (!isLoading) {
+                    refreshData();
+                }
+            }, 30000);
+            
+            document.getElementById('auto-refresh-status').textContent = 'Auto (On)';
+            console.log('Auto-refresh started (30s)');
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+            
+            document.getElementById('auto-refresh-status').textContent = 'Auto (Off)';
+            console.log('Auto-refresh stopped');
+        }
+
+        function toggleAutoRefresh() {
+            if (autoRefreshInterval) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        }
+
+        function exportData() {
+            if (!currentData || currentData.length === 0) {
+                alert('No data to export');
                 return;
             }
             
-            var filteredData = currentData.filter(function(item) {
-                return item.symbol.toLowerCase().includes(searchTerm) ||
-                       item.exchange.toLowerCase().includes(searchTerm);
-            });
+            var csvHeaders = 'Ranking,Symbol,Long Exchange,Short Exchange,APR,Net Funding Rate,Spread Rate,Open Interest,Settlement\n';
+            var csvRows = currentData.map(function(item) {
+                return [
+                    item.ranking,
+                    item.symbol,
+                    item.longExchange.exchange,
+                    item.shortExchange.exchange,
+                    item.apr.toFixed(2) + '%',
+                    (item.fundingRate * 100).toFixed(4) + '%',
+                    (item.spreadRate * 100).toFixed(2) + '%',
+                    formatNumber(item.openInterest),
+                    item.settlement
+                ].join(',');
+            }).join('\n');
             
-            renderFundingRatesTable(filteredData);
+            var csvContent = csvHeaders + csvRows;
+            var blob = new Blob([csvContent], { type: 'text/csv' });
+            var url = window.URL.createObjectURL(blob);
+            
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'funding-rates-arbitrage-' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            console.log('Data exported to CSV');
         }
 
+        function showAddCryptoModal() {
+            var symbol = prompt('Enter cryptocurrency symbol (e.g., BTC, ETH, ADA):');
+            if (symbol) {
+                symbol = symbol.toUpperCase().trim();
+                alert('Add crypto feature: ' + symbol + '\nThis would connect to exchange APIs to add new trading pairs.');
+                console.log('Would add:', symbol);
+            }
+        }
+
+        // Toggle button handlers
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Funding Rates Monitor - Version CORS');
+            console.log('🚀 Coinglass Clone - Funding Rates Monitor');
             console.log('Backend:', BACKEND_URL);
             
+            // Initialize toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var group = this.parentElement;
+                    group.querySelectorAll('.toggle-btn').forEach(function(b) {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+            
+            // Auto-start data loading
             setTimeout(function() {
-                testBackend();
-                setTimeout(smartRefresh, 2000);
+                refreshData();
             }, 1000);
+            
+            // Update settlement times every second
+            setInterval(function() {
+                if (currentData.length > 0) {
+                    currentData.forEach(function(item) {
+                        item.settlement = getNextSettlement();
+                    });
+                    
+                    if (!isLoading) {
+                        renderTable(filteredData);
+                    }
+                }
+            }, 1000);
+            
+            console.log('✅ Coinglass clone initialized');
         });
     </script>
 </body>
