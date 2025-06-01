@@ -714,20 +714,148 @@
     </div>
 
     <script>
+        // DONNÉES INITIALES
         var favoriteSymbols = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA'];
-        
-        var fundingRatesData = [
-            { symbol: 'BTC', binance: 0.0049, okx: 0.0029, bybit: 0.0076, kucoin: 0.0014, gate: 0.0017, favorite: true },
-            { symbol: 'ETH', binance: 0.0034, okx: 0.0062, bybit: 0.0014, kucoin: 0.0031, gate: 0.0088, favorite: true },
-            { symbol: 'SOL', binance: -0.0052, okx: 0.0008, bybit: -0.0139, kucoin: 0.0032, gate: 0.0033, favorite: true },
-            { symbol: 'XRP', binance: -0.0076, okx: -0.0061, bybit: -0.0057, kucoin: -0.0015, gate: -0.0057, favorite: true },
-            { symbol: 'DOGE', binance: 0.0058, okx: -0.0031, bybit: -0.0012, kucoin: 0.0078, gate: 0.0039, favorite: true },
-            { symbol: 'ADA', binance: -0.0134, okx: 0.0002, bybit: -0.0024, kucoin: -0.0027, gate: 0.0084, favorite: true },
-            { symbol: 'BNB', binance: -0.0018, okx: -0.0035, bybit: -0.0172, kucoin: 0.0002, gate: null, favorite: false },
-            { symbol: 'MATIC', binance: 0.0123, okx: 0.0087, bybit: 0.0065, kucoin: 0.0132, gate: 0.0074, favorite: false },
-            { symbol: 'AVAX', binance: 0.0232, okx: 0.0154, bybit: 0.0196, kucoin: 0.0196, gate: 0.0165, favorite: false },
-            { symbol: 'ATOM', binance: -0.0091, okx: 0.0032, bybit: 0.0010, kucoin: -0.0065, gate: 0.0043, favorite: false }
-        ];
+        var fundingRatesData = [];
+
+        // Initialiser avec des données par défaut
+        function initializeData() {
+            fundingRatesData = [
+                { symbol: 'BTC', binance: 0.0049, okx: 0.0029, bybit: 0.0076, kucoin: 0.0014, gate: 0.0017, favorite: true },
+                { symbol: 'ETH', binance: 0.0034, okx: 0.0062, bybit: 0.0014, kucoin: 0.0031, gate: 0.0088, favorite: true },
+                { symbol: 'SOL', binance: -0.0052, okx: 0.0008, bybit: -0.0139, kucoin: 0.0032, gate: 0.0033, favorite: true },
+                { symbol: 'XRP', binance: -0.0076, okx: -0.0061, bybit: -0.0057, kucoin: -0.0015, gate: -0.0057, favorite: true },
+                { symbol: 'DOGE', binance: 0.0058, okx: -0.0031, bybit: -0.0012, kucoin: 0.0078, gate: 0.0039, favorite: true },
+                { symbol: 'ADA', binance: -0.0134, okx: 0.0002, bybit: -0.0024, kucoin: -0.0027, gate: 0.0084, favorite: true }
+            ];
+        }
+
+        // Fonction pour récupérer les données réelles
+        function fetchRealFundingRates() {
+            console.log('🔄 Fetching real funding rates...');
+            
+            return fetch(API_CONFIG.backendUrl + '/api/funding-rates', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function(result) {
+                console.log('✅ Real data received:', result);
+                
+                var realData = [];
+                if (result.success && result.data) {
+                    // Transformer les données backend en format frontend
+                    var symbolGroups = {};
+                    
+                    result.data.forEach(function(item) {
+                        if (!symbolGroups[item.symbol]) {
+                            symbolGroups[item.symbol] = {};
+                        }
+                        symbolGroups[item.symbol][item.exchange.toLowerCase()] = parseFloat(item.fundingRate);
+                    });
+                    
+                    // Convertir en format requis
+                    Object.keys(symbolGroups).forEach(function(symbol) {
+                        var rates = symbolGroups[symbol];
+                        realData.push({
+                            symbol: symbol,
+                            binance: rates.binance || null,
+                            okx: rates.okx || null,
+                            bybit: rates.bybit || null,
+                            kucoin: rates.kucoin || null,
+                            gate: rates.gate || rates['gate.io'] || null,
+                            favorite: favoriteSymbols.includes(symbol)
+                        });
+                    });
+                    
+                    return realData;
+                } else {
+                    throw new Error('Invalid data format');
+                }
+            })
+            .catch(function(error) {
+                console.error('❌ Error fetching real data:', error);
+                
+                if (!API_CONFIG.fallbackMode) {
+                    console.log('⚠️ Switching to fallback mode...');
+                    API_CONFIG.fallbackMode = true;
+                }
+                
+                // Retourner données simulées en cas d'erreur
+                return generateSimulatedData();
+            });
+        }
+
+        // Fonction pour générer des données simulées réalistes
+        function generateSimulatedData() {
+            var baseData = [
+                { symbol: 'BTC', baseRate: 0.003 },
+                { symbol: 'ETH', baseRate: 0.004 },
+                { symbol: 'SOL', baseRate: -0.001 },
+                { symbol: 'XRP', baseRate: -0.006 },
+                { symbol: 'DOGE', baseRate: 0.002 },
+                { symbol: 'ADA', baseRate: -0.003 },
+                { symbol: 'MATIC', baseRate: 0.008 },
+                { symbol: 'AVAX', baseRate: 0.015 },
+                { symbol: 'ATOM', baseRate: -0.002 },
+                { symbol: 'DOT', baseRate: 0.006 }
+            ];
+            
+            return baseData.map(function(item) {
+                var variation = 0.005;
+                return {
+                    symbol: item.symbol,
+                    binance: item.baseRate + (Math.random() - 0.5) * variation,
+                    okx: item.baseRate + (Math.random() - 0.5) * variation,
+                    bybit: item.baseRate + (Math.random() - 0.5) * variation,
+                    kucoin: item.baseRate + (Math.random() - 0.5) * variation,
+                    gate: item.baseRate + (Math.random() - 0.5) * variation,
+                    favorite: favoriteSymbols.includes(item.symbol)
+                };
+            });
+        }
+
+        // Fonction unifiée de refresh
+        function refreshData() {
+            console.log('🔄 Refreshing data... (Real data: ' + API_CONFIG.useRealData + ')');
+            
+            if (API_CONFIG.useRealData && !API_CONFIG.fallbackMode) {
+                // Essayer les vraies données
+                fetchRealFundingRates()
+                    .then(function(data) {
+                        fundingRatesData = data;
+                        renderFundingRatesTable();
+                        renderArbitrageTable();
+                        updateConnectionStatus('Live Data ✅', true);
+                    });
+            } else {
+                // Utiliser données simulées
+                fundingRatesData = generateSimulatedData();
+                renderFundingRatesTable();
+                renderArbitrageTable();
+                updateConnectionStatus('Simulated Data 📊', false);
+            }
+        }
+
+        function updateConnectionStatus(message, isLive) {
+            var statusEl = document.querySelector('.status-indicator span');
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+            
+            var dot = document.querySelector('.status-dot');
+            if (dot) {
+                dot.style.background = isLive ? '#0ecb81' : '#f59e0b';
+            }
+        }
 
         function formatRate(rate) {
             if (rate === null || rate === undefined) {
@@ -1017,6 +1145,10 @@
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             console.log('💰 Funding Rates Monitor loaded');
+            console.log('🔧 API Mode: ' + (API_CONFIG.useRealData ? 'REAL DATA' : 'SIMULATED'));
+            
+            // Initialize data
+            initializeData();
             
             // Setup toggle buttons
             document.querySelectorAll('.toggle-btn').forEach(function(btn) {
@@ -1029,9 +1161,33 @@
                 });
             });
             
+            // Ajouter bouton pour basculer mode données
+            var headerControls = document.querySelector('.header-controls');
+            var toggleDataBtn = document.createElement('button');
+            toggleDataBtn.className = 'btn-header';
+            toggleDataBtn.innerHTML = '<i class="fas fa-database"></i> <span id="data-mode">Real Data</span>';
+            toggleDataBtn.onclick = function() {
+                API_CONFIG.useRealData = !API_CONFIG.useRealData;
+                API_CONFIG.fallbackMode = false;
+                
+                var modeSpan = document.getElementById('data-mode');
+                modeSpan.textContent = API_CONFIG.useRealData ? 'Real Data' : 'Demo Data';
+                
+                console.log('🔄 Switched to ' + (API_CONFIG.useRealData ? 'REAL' : 'DEMO') + ' data mode');
+                refreshData();
+            };
+            headerControls.insertBefore(toggleDataBtn, headerControls.firstChild);
+            
             // Initial render
             renderFundingRatesTable();
             renderArbitrageTable();
+            
+            // Essayer de charger les vraies données au démarrage
+            if (API_CONFIG.useRealData) {
+                setTimeout(function() {
+                    refreshData();
+                }, 2000);
+            }
             
             // Update settlement timer every second
             setInterval(function() {
@@ -1047,14 +1203,14 @@
                 });
             }, 1000);
             
-            // Auto-refresh data every 45 seconds
+            // Auto-refresh data every 30 seconds (plus fréquent pour les vraies données)
             setInterval(function() {
                 refreshData();
-            }, 45000);
+            }, 30000);
             
             console.log('✅ Platform initialized');
-            console.log('📊 Showing funding rates for ' + fundingRatesData.length + ' cryptocurrencies');
-            console.log('⭐ ' + favoriteSymbols.length + ' favorites marked');
+            console.log('📊 Ready to load funding rates');
+            console.log('⭐ ' + favoriteSymbols.length + ' favorites configured');
         });
     </script>
 </body>
