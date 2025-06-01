@@ -1,4 +1,88 @@
-<!DOCTYPE html>
+// Données de démonstration - VERSION 3 EXCHANGES
+        const demoData = [
+            { symbol: 'BTC/USDT:USDT', binance: 0.0001, kucoin: 0.0003, bybit: 0.0002 },
+            { symbol: 'ETH/USDT:USDT', binance: 0.0005, kucoin: 0.0007, bybit: 0.0006 },
+            { symbol: 'SOL/USDT:USDT', binance: -0.0001, kucoin: -0.0003, bybit: -0.0002 },
+            { symbol: 'XRP/USDT:USDT', binance: -0.0076, kucoin: -0.0057, bybit: -0.0061 },
+            { symbol: 'DOGE/USDT:USDT', binance: 0.0058, kucoin: 0.0061, bybit: 0.0042 },
+            { symbol: 'ADA/USDT:USDT', binance: 0.0032, kucoin: 0.0038, bybit: 0.0025 },
+            { symbol: 'AVAX/USDT:USDT', binance: -0.0045, kucoin: -0.0052, bybit: -0.0041 },
+            { symbol: 'MATIC/USDT:USDT', binance: 0.0021, kucoin: 0.0018, bybit: 0.0024 },
+            { symbol: 'LINK/USDT:USDT', binance: -0.0033, kucoin: -0.0028, bybit: -0.0035 },
+            { symbol: 'DOT/USDT:USDT', binance: 0.        // Fonction pour récupérer les opportunités d'arbitrage - VERSION AVEC SIGNAUX
+        async function fetchArbitrageData() {
+            try {
+                console.log(`🎯 Fetching arbitrage data from: ${BACKEND_URL}/api/arbitrage`);
+                
+                const response = await fetch(`${BACKEND_URL}/api/arbitrage`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'omit'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const responseData = await response.json();
+                console.log('🎯 Arbitrage response:', responseData);
+                
+                if (responseData.status === 'success') {
+                    arbitrageData = responseData.data || [];
+                    
+                    console.log(`✅ Loaded ${arbitrageData.length} arbitrage opportunities`);
+                    
+                    // Mettre à jour le timer de funding si disponible
+                    if (responseData.next_funding) {
+                        updateFundingTimer(responseData.next_funding);
+                    }
+                    
+                    renderArbitrageTable();
+                } else {
+                    throw new Error(responseData.message || 'Failed to fetch arbitrage data');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to fetch arbitrage data:', error);
+                
+                // Utiliser des données démo d'arbitrage si échec
+                arbitrageData = [
+                    {
+                        symbol: 'BTC',
+                        strategy: 'Long/Short',
+                        longExchange: 'binance',
+                        shortExchange: 'bybit',
+                        longRate: 0.0001,
+                        shortRate: 0.0005,
+                        divergence_pct: 0.04,
+                        revenue_8h_pct: 0.03,
+                        revenue_annual_pct: 32.9,
+                        signal: '🟢 ENTRER MAINTENANT',
+                        signal_detail: 'Ouvrir position 6h30m avant funding'
+                    },
+                    {
+                        symbol: 'ETH',
+                        strategy: 'Long/Short',
+                        longExchange: 'okx',
+                        shortExchange: 'gate',
+                        longRate: 0.0002,
+                        shortRate: 0.0006,
+                        divergence_pct: 0.04,
+                        revenue_8h_pct: 0.03,
+                        revenue_annual_pct: 28.5,
+                        signal: '🟡 ENTRER BIENTÔT',
+                        signal_detail: 'Position à ouvrir dans 25m'
+                    }
+                ];
+                
+                renderArbitrageTable();
+            }
+        }
+                    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -376,23 +460,23 @@
 
     <script>
         // Configuration
-        let BACKEND_URL = 'https://funding-rates-backend.onrender.com'; // Votre backend Render
+        let BACKEND_URL = 'https://funding-rates-backend-l7mj.onrender.com'; // Votre vraie URL
         let fundingRatesData = [];
         let watchedSymbols = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE']; // Symboles par défaut
         let useRealData = false; // Mode démo par défaut
 
-        // Données de démonstration basées sur vos captures d'écran
+        // Données de démonstration - VERSION 3 EXCHANGES
         const demoData = [
-            { symbol: 'FIL/USDT:USDT', binance: -0.004703, bybit: -0.0232, okx: -0.334535, bitget: -0.0047, gate: -0.0245, coinex: 0.737473 },
-            { symbol: 'HNT/USDT:USDT', binance: -0.030722, bybit: -0.0141, okx: null, bitget: null, gate: 0.0051, coinex: 0.304442 },
-            { symbol: 'OP/USDT:USDT', binance: -0.057856, bybit: -0.0235, okx: -0.206011, bitget: -0.0589, gate: -0.0162, coinex: -0.148713 },
-            { symbol: 'MKR/USDT:USDT', binance: 0.010000, bybit: 0.0100, okx: -0.056437, bitget: 0.0104, gate: 0.0100, coinex: 0.075530 },
-            { symbol: 'TON/USDT:USDT', binance: null, bybit: null, okx: -0.023741, bitget: null, gate: 0.0100, coinex: -0.116483 },
-            { symbol: 'BTC/USDT:USDT', binance: 0.0048, bybit: 0.0032, okx: 0.0051, bitget: 0.0039, gate: 0.0045, coinex: 0.0041 },
-            { symbol: 'ETH/USDT:USDT', binance: 0.0034, bybit: 0.0028, okx: 0.0042, bitget: 0.0031, gate: 0.0037, coinex: 0.0035 },
-            { symbol: 'SOL/USDT:USDT', binance: -0.0052, bybit: -0.0039, okx: -0.0048, bitget: -0.0041, gate: -0.0035, coinex: -0.0044 },
-            { symbol: 'XRP/USDT:USDT', binance: -0.0076, bybit: -0.0061, okx: -0.0057, bitget: -0.0069, gate: -0.0073, coinex: -0.0065 },
-            { symbol: 'DOGE/USDT:USDT', binance: 0.0058, bybit: 0.0042, okx: 0.0061, bitget: 0.0055, gate: 0.0049, coinex: 0.0053 }
+            { symbol: 'BTC/USDT:USDT', binance: 0.0001, kucoin: 0.0003, bybit: 0.0002 },
+            { symbol: 'ETH/USDT:USDT', binance: 0.0005, kucoin: 0.0007, bybit: 0.0006 },
+            { symbol: 'SOL/USDT:USDT', binance: -0.0001, kucoin: -0.0003, bybit: -0.0002 },
+            { symbol: 'XRP/USDT:USDT', binance: -0.0076, kucoin: -0.0057, bybit: -0.0061 },
+            { symbol: 'DOGE/USDT:USDT', binance: 0.0058, kucoin: 0.0061, bybit: 0.0042 },
+            { symbol: 'ADA/USDT:USDT', binance: 0.0032, kucoin: 0.0038, bybit: 0.0025 },
+            { symbol: 'AVAX/USDT:USDT', binance: -0.0045, kucoin: -0.0052, bybit: -0.0041 },
+            { symbol: 'MATIC/USDT:USDT', binance: 0.0021, kucoin: 0.0018, bybit: 0.0024 },
+            { symbol: 'LINK/USDT:USDT', binance: -0.0033, kucoin: -0.0028, bybit: -0.0035 },
+            { symbol: 'DOT/USDT:USDT', binance: 0.0015, kucoin: 0.0012, bybit: 0.0018 }
         ];
 
         // Fonctions utilitaires
@@ -509,33 +593,42 @@
             console.log(`Added ${symbol} to monitoring`);
         }
 
-        // Rendu de la table des funding rates
+        // Rendu de la table des funding rates - VERSION CORRIGEE
         function renderFundingRatesTable() {
             const tbody = document.getElementById('funding-rates-body');
             
+            console.log('🎨 Rendering table with', fundingRatesData.length, 'symbols');
+            
             if (fundingRatesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="loading">No data available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="loading">No data available - Check console for details</td></tr>';
                 return;
             }
             
-            const rows = fundingRatesData.map(item => {
-                const cleanSymbol = item.symbol.split('/')[0]; // Extraire juste BTC de BTC/USDT:USDT
+            const rows = fundingRatesData.map((item, index) => {
+                const cleanSymbol = item.symbol ? item.symbol.split('/')[0] : `Symbol_${index}`;
+                
+                // Debug chaque ligne
+                console.log(`📊 Row ${index} - ${cleanSymbol}:`, {
+                    symbol: item.symbol,
+                    binance: typeof item.binance + ' = ' + item.binance,
+                    bybit: typeof item.bybit + ' = ' + item.bybit,
+                    okx: typeof item.okx + ' = ' + item.okx,
+                    gate: typeof item.gate + ' = ' + item.gate
+                });
                 
                 return `
                     <tr>
                         <td class="symbol-cell">${cleanSymbol}</td>
                         <td class="${getRateClass(item.binance)}">${formatRate(item.binance)}</td>
+                        <td class="${getRateClass(item.kucoin)}">${formatRate(item.kucoin)}</td>
                         <td class="${getRateClass(item.bybit)}">${formatRate(item.bybit)}</td>
-                        <td class="${getRateClass(item.okx)}">${formatRate(item.okx)}</td>
-                        <td class="${getRateClass(item.bitget)}">${formatRate(item.bitget)}</td>
-                        <td class="${getRateClass(item.gate)}">${formatRate(item.gate)}</td>
-                        <td class="${getRateClass(item.coinex)}">${formatRate(item.coinex)}</td>
                     </tr>
                 `;
             }).join('');
             
             tbody.innerHTML = rows;
             updateLastUpdateTime();
+            console.log('✅ Table rendered successfully with', rows.split('<tr>').length - 1, 'rows');
         }
 
         // Calcul et rendu des opportunités d'arbitrage
@@ -629,44 +722,78 @@
             tbody.innerHTML = rows;
         }
 
-        // Fonction pour récupérer les données réelles
+        // Fonction pour récupérer les données réelles - VERSION CORRIGEE
         async function fetchRealData() {
             try {
                 updateStatus('Connecting to backend...', false);
                 
-                console.log(`Attempting to fetch from: ${BACKEND_URL}/api/funding-rates`);
+                const fullUrl = `${BACKEND_URL}/api/funding-rates`;
+                console.log(`🔄 Fetching from: ${fullUrl}`);
                 
-                const response = await fetch(`${BACKEND_URL}/api/funding-rates`, {
+                const response = await fetch(fullUrl, {
                     method: 'GET',
+                    mode: 'cors',
                     headers: {
+                        'Accept': 'application/json',
                         'Content-Type': 'application/json',
                     },
-                    // Ajouter un timeout
-                    signal: AbortSignal.timeout(10000) // 10 secondes
+                    credentials: 'omit'
                 });
+                
+                console.log(`📡 Response status: ${response.status}`);
+                console.log(`📡 Response headers:`, [...response.headers.entries()]);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const data = await response.json();
-                console.log('✅ Real data received:', data);
+                const responseData = await response.json();
+                console.log('📦 Raw backend response:', responseData);
+                
+                if (responseData.status !== 'success') {
+                    throw new Error(`Backend error: ${responseData.message || 'Unknown error'}`);
+                }
+                
+                if (!responseData.data || responseData.data.length === 0) {
+                    console.warn('⚠️ Backend returned empty data, using demo data');
+                    updateStatus('🟡 Backend online but no data - using demo', false);
+                    loadDemoData();
+                    return;
+                }
                 
                 // Traiter les données du backend
-                fundingRatesData = processBackendData(data);
-                updateStatus('🟢 Live Data Connected', true);
+                console.log(`📊 Processing ${responseData.data.length} raw items from backend`);
+                fundingRatesData = processBackendData(responseData.data);
+                
+                if (fundingRatesData.length === 0) {
+                    console.warn('⚠️ No symbols after processing, using demo data');
+                    updateStatus('🟡 Data processing issue - using demo', false);
+                    loadDemoData();
+                    return;
+                }
+                
+                updateStatus(`🟢 Live Data: ${fundingRatesData.length} symbols`, true);
                 
                 renderFundingRatesTable();
                 calculateAndRenderArbitrage();
                 
+                console.log('🎉 Real data successfully loaded and displayed');
+                
             } catch (error) {
                 console.error('❌ Failed to fetch real data:', error);
+                console.error('❌ Error details:', {
+                    name: error.name,
+                    message: error.message,
+                    stack: error.stack
+                });
                 
                 let errorMessage = 'Connection Failed';
-                if (error.name === 'AbortError') {
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'CORS/Network Error';
+                } else if (error.name === 'AbortError') {
                     errorMessage = 'Request Timeout';
-                } else if (error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Backend Offline';
+                } else if (error.message.includes('HTTP')) {
+                    errorMessage = `Backend Error: ${error.message}`;
                 }
                 
                 updateStatus(`🔴 ${errorMessage} - Using Demo`, false);
@@ -674,8 +801,10 @@
                 // Revenir au mode démo automatiquement
                 useRealData = false;
                 const btn = document.getElementById('toggle-mode-btn');
-                btn.textContent = 'Switch to Real Data';
-                btn.style.background = '#3498db';
+                if (btn) {
+                    btn.textContent = 'Switch to Real Data';
+                    btn.style.background = '#3498db';
+                }
                 
                 loadDemoData();
             }
@@ -686,6 +815,8 @@
             const grouped = {};
             const dataArray = Array.isArray(data) ? data : (data.data || []);
             
+            console.log('📊 Processing backend data:', dataArray.length, 'items');
+            
             dataArray.forEach(item => {
                 const symbol = item.symbol;
                 const exchange = item.exchange.toLowerCase();
@@ -695,18 +826,29 @@
                     grouped[symbol] = {
                         symbol: symbol,
                         binance: null,
-                        bybit: null,
-                        okx: null,
-                        bitget: null,
-                        gate: null,
-                        coinex: null
+                        kucoin: null,
+                        bybit: null
                     };
                 }
                 
-                grouped[symbol][exchange] = rate;
+                // Mapper les noms d'exchanges (seulement 3)
+                const exchangeMap = {
+                    'binance': 'binance',
+                    'kucoin': 'kucoin',
+                    'bybit': 'bybit'
+                };
+                
+                const mappedExchange = exchangeMap[exchange];
+                if (mappedExchange) {
+                    grouped[symbol][mappedExchange] = rate;
+                }
             });
             
-            return Object.values(grouped);
+            const result = Object.values(grouped);
+            console.log('✅ Processed into', result.length, 'symbols');
+            console.log('📊 Sample data:', result[0]);
+            
+            return result;
         }
 
         // Initialisation
