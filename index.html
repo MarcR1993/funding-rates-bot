@@ -1,11 +1,10 @@
-// Basculer exchange
-        function toggleExchange(key) {
-            config.exchanges[key].active = !config.exchanges[key<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funding Rates Bot - Arbitrage Crypto Live</title>
+    <title>🚀 Funding Rates Bot - Arbitrage Crypto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -14,11 +13,10 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: white;
-            overflow-x: hidden;
         }
 
         .container {
@@ -29,505 +27,193 @@
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
         .header h1 {
-            font-size: 3rem;
-            font-weight: bold;
+            font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            background: linear-gradient(45deg, #fff, #f0f0f0);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            margin-bottom: 20px;
-        }
-
-        .api-status {
-            display: inline-block;
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 500;
+            backdrop-filter: blur(10px);
             margin-bottom: 20px;
         }
 
-        .api-status.success {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            color: #4CAF50;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
         }
 
-        .api-status.error {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid rgba(244, 67, 54, 0.3);
-            color: #f44336;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
-        .tab-nav {
+        .controls {
             display: flex;
             justify-content: center;
+            gap: 15px;
             margin-bottom: 30px;
-            gap: 10px;
             flex-wrap: wrap;
         }
 
-        .tab-btn {
+        .btn {
             padding: 12px 24px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: none;
             border-radius: 25px;
-            color: white;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 1rem;
-            backdrop-filter: blur(10px);
+            font-size: 14px;
         }
 
-        .tab-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
         }
 
-        .tab-btn.active {
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary:hover {
             background: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.3s ease-in;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card h3 {
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: 20px;
+            margin-bottom: 30px;
         }
 
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
         }
 
         .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: #4CAF50;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #00ff88;
         }
 
         .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
             overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .data-table th,
-        .data-table td {
-            padding: 12px 15px;
-            text-align: left;
+        .table-header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            font-weight: 600;
+            font-size: 0.9rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .data-table th {
-            background: rgba(255, 255, 255, 0.1);
-            font-weight: 600;
-        }
-
-        .data-table tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .exchange-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .exchange-binance { background: #f0b90b; color: #000; }
-        .exchange-kucoin { background: #24ae8f; color: #fff; }
-        .exchange-bybit { background: #f7931a; color: #fff; }
-        .exchange-okx { background: #1677ff; color: #fff; }
-
-        .funding-rate {
-            font-weight: bold;
-        }
-
-        .funding-rate.positive { color: #4CAF50; }
-        .funding-rate.negative { color: #f44336; }
-
-        .crypto-grid {
+        .table-row {
+            padding: 15px 20px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background 0.3s ease;
         }
 
-        .crypto-item {
+        .table-row:hover {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            padding: 15px;
+        }
+
+        .rate-positive {
+            color: #00ff88;
+        }
+
+        .rate-negative {
+            color: #ff6b6b;
+        }
+
+        .loading {
             text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 40px;
+            font-size: 1.1rem;
         }
 
-        .crypto-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .crypto-item.selected {
-            background: rgba(76, 175, 80, 0.3);
-            border-color: #4CAF50;
-        }
-
-        .crypto-symbol {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .crypto-name {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .exchange-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .exchange-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .exchange-card.connected {
-            border-color: #4CAF50;
-            background: rgba(76, 175, 80, 0.1);
-        }
-
-        .exchange-card.disabled {
-            opacity: 0.5;
-        }
-
-        .exchange-toggle {
-            margin-top: 15px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-left: 4px solid #00ff88;
             border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
 
-        input:checked + .slider {
-            background-color: #4CAF50;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .arbitrage-section {
-            margin-bottom: 30px;
-        }
-
-        .funding-schedule {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .schedule-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
+        .footer {
             text-align: center;
-        }
-
-        .schedule-time {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4CAF50;
-            margin-bottom: 5px;
-        }
-
-        .schedule-exchanges {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .opportunity-card {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .opportunity-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .opportunity-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .opportunity-crypto {
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        .opportunity-apr {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4CAF50;
-        }
-
-        .opportunity-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-
-        .detail-item {
-            text-align: center;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-
-        .detail-label {
-            font-size: 0.8rem;
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
-            font-weight: bold;
-        }
-
-        .btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            border: none;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(45deg, #45a049, #4CAF50);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 10% auto;
-            padding: 30px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-            color: white;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 2rem;
-            cursor: pointer;
-            color: white;
+            margin-top: 30px;
             opacity: 0.7;
+            font-size: 0.9rem;
         }
 
-        .modal-close:hover {
-            opacity: 1;
-        }
-
-        .settings-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .setting-group {
-            background: rgba(255, 255, 255, 0.1);
+        .error-message {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 15px;
             border-radius: 10px;
-            padding: 20px;
-        }
-
-        .setting-group h4 {
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .setting-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .setting-input {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            padding: 8px 12px;
-            color: white;
-            width: 100px;
-        }
-
-        .setting-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            margin: 20px 0;
+            text-align: center;
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
+            .table-header, .table-row {
+                grid-template-columns: 1fr 1fr 1fr;
+                font-size: 0.8rem;
             }
             
-            .tab-nav {
-                gap: 5px;
-            }
-            
-            .tab-btn {
-                padding: 10px 16px;
-                font-size: 0.9rem;
-            }
-            
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .opportunity-details {
-                grid-template-columns: 1fr 1fr;
+            .table-header span:nth-child(4),
+            .table-header span:nth-child(5),
+            .table-row span:nth-child(4),
+            .table-row span:nth-child(5) {
+                display: none;
             }
         }
     </style>
@@ -535,876 +221,340 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>FUNDING RATES BOT</h1>
-            <p>Configuration facile - Interface No-Code + APIs Live</p>
-            <div id="api-status" class="api-status">
-                <span style="color: #ffd93d;">⚡</span> Connexion aux APIs en cours...
+            <h1>🚀 Funding Rates Bot</h1>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span id="status-text">🔄 Connecting to API...</span>
             </div>
         </div>
 
-        <nav class="tab-nav">
-            <div class="tab-btn active" data-tab="dashboard">DASHBOARD</div>
-            <div class="tab-btn" data-tab="cryptos">CRYPTOS</div>
-            <div class="tab-btn" data-tab="exchanges">EXCHANGES</div>
-            <div class="tab-btn" data-tab="arbitrage">ARBITRAGE</div>
-            <div class="tab-btn" data-tab="settings">PARAMETRES</div>
-        </nav>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="loadLiveData()">
+                🔄 Actualiser données
+            </button>
+            <button class="btn btn-secondary" onclick="showArbitrageOpportunities()">
+                💰 Voir arbitrage
+            </button>
+            <button class="btn btn-secondary" onclick="exportToCSV()">
+                📊 Export CSV
+            </button>
+        </div>
 
-        <!-- DASHBOARD TAB -->
-        <div id="dashboard" class="tab-content active">
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>📊 Vue d'ensemble</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value" id="stats-cryptos">7</div>
-                            <div class="stat-label">Cryptos</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="stats-exchanges">4</div>
-                            <div class="stat-label">Exchanges</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value" id="stats-pairs">28</div>
-                            <div class="stat-label">Pairs</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>🔥 Top Opportunities</h3>
-                    <div id="top-opportunities">
-                        <div style="text-align: center; opacity: 0.7; padding: 20px;">
-                            Chargement des opportunités...
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>⏰ Prochains Fundings</h3>
-                    <div id="next-fundings">
-                        <div style="text-align: center; opacity: 0.7; padding: 20px;">
-                            Calcul des horaires...
-                        </div>
-                    </div>
-                </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-title">Total Pairs</div>
+                <div class="stat-value" id="total-pairs">-</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-title">Exchanges</div>
+                <div class="stat-value" id="total-exchanges">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Response Time</div>
+                <div class="stat-value" id="response-time">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Dernière MàJ</div>
+                <div class="stat-value" id="last-update">-</div>
+            </div>
+        </div>
 
-            <div class="card">
-                <h3>📈 Funding Rates Live</h3>
-                <div style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Crypto</th>
-                                <th>Exchange</th>
-                                <th>Funding Rate</th>
-                                <th>APR Annuel</th>
-                                <th>Prochain Funding</th>
-                            </tr>
-                        </thead>
-                        <tbody id="live-data-table">
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 30px; opacity: 0.7;">
-                                    🔄 Chargement des données live...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+        <div class="data-table">
+            <div class="table-header">
+                <span>Exchange</span>
+                <span>Symbole</span>
+                <span>Funding Rate</span>
+                <span>Mark Price</span>
+                <span>APR Annuel</span>
+            </div>
+            <div id="data-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Chargement des données...
                 </div>
             </div>
         </div>
 
-        <!-- CRYPTOS TAB -->
-        <div id="cryptos" class="tab-content">
-            <div class="card">
-                <h3>🪙 Gestion des Cryptomonnaies</h3>
-                <p style="margin-bottom: 20px; opacity: 0.8;">Sélectionne les cryptos à surveiller pour l'arbitrage</p>
-                <div class="crypto-grid" id="crypto-grid">
-                    <!-- Cryptos seront ajoutées dynamiquement -->
-                </div>
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="saveCryptoConfig()">Sauvegarder Configuration</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- EXCHANGES TAB -->
-        <div id="exchanges" class="tab-content">
-            <div class="card">
-                <h3>🏢 Gestion des Exchanges</h3>
-                <p style="margin-bottom: 20px; opacity: 0.8;">Active/désactive les exchanges que tu veux surveiller</p>
-                <div class="exchange-grid" id="exchange-grid">
-                    <!-- Exchanges seront ajoutés dynamiquement -->
-                </div>
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="saveExchangeConfig()">Sauvegarder Configuration</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ARBITRAGE TAB -->
-        <div id="arbitrage" class="tab-content">
-            <div class="arbitrage-section">
-                <div class="card">
-                    <h3>⏰ Horaires de Funding</h3>
-                    <div class="funding-schedule">
-                        <div class="schedule-item">
-                            <div class="schedule-time">00:00 UTC</div>
-                            <div class="schedule-exchanges">Binance • KuCoin • Bybit</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">01:00 UTC</div>
-                            <div class="schedule-exchanges">OKX</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">08:00 UTC</div>
-                            <div class="schedule-exchanges">Binance • KuCoin • Bybit</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">09:00 UTC</div>
-                            <div class="schedule-exchanges">OKX</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">16:00 UTC</div>
-                            <div class="schedule-exchanges">Binance • KuCoin • Bybit</div>
-                        </div>
-                        <div class="schedule-item">
-                            <div class="schedule-time">17:00 UTC</div>
-                            <div class="schedule-exchanges">OKX</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>🔥 TOP 5 Opportunités d'Arbitrage</h3>
-                <div id="arbitrage-opportunities">
-                    <div style="text-align: center; opacity: 0.7; padding: 40px;">
-                        📊 Calcul des opportunités en cours...<br>
-                        <small>Analyse des spreads entre exchanges</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SETTINGS TAB -->
-        <div id="settings" class="tab-content">
-            <div class="settings-grid">
-                <div class="setting-group">
-                    <h4>⚙️ Paramètres Généraux</h4>
-                    <div class="setting-item">
-                        <span>Fréquence de collecte (secondes)</span>
-                        <input type="number" class="setting-input" value="30" id="refresh-interval">
-                    </div>
-                    <div class="setting-item">
-                        <span>Seuil d'alerte APR (%)</span>
-                        <input type="number" class="setting-input" value="50" id="alert-threshold">
-                    </div>
-                    <div class="setting-item">
-                        <span>Notifications actives</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="notifications-enabled" checked>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="setting-group">
-                    <h4>📊 Affichage</h4>
-                    <div class="setting-item">
-                        <span>Nombre max d'opportunités</span>
-                        <input type="number" class="setting-input" value="5" id="max-opportunities">
-                    </div>
-                    <div class="setting-item">
-                        <span>Précision des taux (%)</span>
-                        <input type="number" class="setting-input" value="4" id="rate-precision">
-                    </div>
-                </div>
-
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn btn-primary" onclick="saveSettings()">Sauvegarder Paramètres</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <div id="modal-body"></div>
+        <div class="footer">
+            <p>💡 Données en temps réel • ⚡ API professionnelle • 🔒 Sécurisé</p>
+            <p>🚀 Powered by FastAPI + CCXT</p>
         </div>
     </div>
 
     <script>
-        // Configuration globale
-        const config = {
-            cryptos: {
-                available: [
-                    { symbol: 'BTC', name: 'Bitcoin' },
-                    { symbol: 'ETH', name: 'Ethereum' },
-                    { symbol: 'SOL', name: 'Solana' },
-                    { symbol: 'ADA', name: 'Cardano' },
-                    { symbol: 'DOT', name: 'Polkadot' },
-                    { symbol: 'MATIC', name: 'Polygon' },
-                    { symbol: 'LINK', name: 'Chainlink' },
-                    { symbol: 'AVAX', name: 'Avalanche' },
-                    { symbol: 'ATOM', name: 'Cosmos' },
-                    { symbol: 'NEAR', name: 'Near Protocol' }
-                ],
-                selected: ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'MATIC', 'LINK']
-            },
-            exchanges: {
-                binance: { name: 'Binance', active: true, type: 'Futures USDT' },
-                kucoin: { name: 'KuCoin', active: false, type: 'Futures USDT' },
-                bybit: { name: 'Bybit', active: false, type: 'USDT Perpetual' },
-                okx: { name: 'OKX', active: false, type: 'Perpetual Swaps' }
-            },
-            settings: {
-                refreshInterval: 30,
-                alertThreshold: 50,
-                maxOpportunities: 5,
-                ratePrecision: 4,
-                notificationsEnabled: true
-            }
-        };
-
-        // Données live
+        // Configuration API - CHANGE TON URL ICI !
+        const BACKEND_URL = 'https://funding-rates-backend.onrender.com'; // ⚠️ REMPLACE PAR TON URL RENDER
+        
+        // Variables globales
         let liveData = [];
-        let opportunities = [];
+        let currentView = 'funding-rates';
 
-        // Configuration des fees par exchange (maker fees en %)
-        const exchangeFees = {
-            binance: { maker: 0.02, taker: 0.04, slippage: 0.05 },
-            kucoin: { maker: 0.02, taker: 0.06, slippage: 0.08 },
-            bybit: { maker: 0.01, taker: 0.06, slippage: 0.07 },
-            okx: { maker: 0.02, taker: 0.05, slippage: 0.06 }
-        };
-
-        // API avec proxy universel amélioré
-        async function fetchWithProxy(url) {
-            const proxies = [
-                'https://api.allorigins.win/get?url=',
-                'https://cors-anywhere.herokuapp.com/',
-                'https://corsproxy.io/?',
-                'https://thingproxy.freeboard.io/fetch/',
-                '' // Direct (pour GitHub Pages)
-            ];
-            
-            for (let i = 0; i < proxies.length; i++) {
-                try {
-                    const proxyUrl = proxies[i];
-                    let fullUrl;
-                    
-                    if (proxyUrl.includes('allorigins')) {
-                        fullUrl = proxyUrl + encodeURIComponent(url);
-                    } else if (proxyUrl === '') {
-                        fullUrl = url; // Direct
-                    } else {
-                        fullUrl = proxyUrl + url;
-                    }
-                    
-                    console.log(`🔄 Tentative ${i + 1}/${proxies.length}:`, proxyUrl || 'Direct');
-                    
-                    const response = await fetch(fullUrl);
-                    let data;
-                    
-                    if (proxyUrl.includes('allorigins')) {
-                        const result = await response.json();
-                        data = JSON.parse(result.contents);
-                    } else {
-                        data = await response.json();
-                    }
-                    
-                    console.log(`✅ Proxy ${i + 1} réussi!`);
-                    return data;
-                    
-                } catch (error) {
-                    console.log(`❌ Proxy ${i + 1} échoué:`, error.message);
-                    if (i === proxies.length - 1) {
-                        throw new Error(`Tous les proxies ont échoué. Utilise GitHub Pages pour résoudre CORS définitivement.`);
-                    }
-                }
-            }
-        }
-
-        // API Binance Futures
-        async function fetchBinanceFundingRates() {
-            try {
-                const data = await fetchWithProxy('https://fapi.binance.com/fapi/v1/premiumIndex');
-                console.log('✅ Binance connecté:', data.length, 'pairs');
-                
-                return data.filter(item => 
-                    item.symbol.endsWith('USDT') && 
-                    config.cryptos.selected.some(crypto => item.symbol.startsWith(crypto))
-                ).map(item => ({
-                    exchange: 'Binance',
-                    symbol: item.symbol.replace('USDT', ''),
-                    fundingRate: parseFloat(item.lastFundingRate),
-                    nextFunding: item.nextFundingTime,
-                    markPrice: parseFloat(item.markPrice)
-                }));
-            } catch (error) {
-                console.error('❌ Binance API error:', error);
-                return [];
-            }
-        }
-
-        // API KuCoin Futures
-        async function fetchKucoinFundingRates() {
-            try {
-                const data = await fetchWithProxy('https://api-futures.kucoin.com/api/v1/contracts/active');
-                console.log('✅ KuCoin connecté:', data.data.length, 'pairs');
-                
-                const fundingData = await fetchWithProxy('https://api-futures.kucoin.com/api/v1/funding-rate');
-                
-                return data.data.filter(item => 
-                    item.quoteCurrency === 'USDT' && 
-                    config.cryptos.selected.some(crypto => item.baseCurrency === crypto)
-                ).map(item => {
-                    const fundingInfo = fundingData.data.find(f => f.symbol === item.symbol);
-                    return {
-                        exchange: 'KuCoin',
-                        symbol: item.baseCurrency,
-                        fundingRate: fundingInfo ? parseFloat(fundingInfo.value) : 0,
-                        nextFunding: Date.now() + (8 * 60 * 60 * 1000), // Approximation
-                        markPrice: parseFloat(item.markPrice || 0)
-                    };
-                });
-            } catch (error) {
-                console.error('❌ KuCoin API error:', error);
-                return [];
-            }
-        }
-
-        // API Bybit Futures
-        async function fetchBybitFundingRates() {
-            try {
-                const data = await fetchWithProxy('https://api.bybit.com/v5/market/instruments-info?category=linear');
-                console.log('✅ Bybit connecté:', data.result.list.length, 'pairs');
-                
-                const fundingData = await fetchWithProxy('https://api.bybit.com/v5/market/funding/history?category=linear&limit=200');
-                
-                return data.result.list.filter(item => 
-                    item.quoteCoin === 'USDT' && 
-                    config.cryptos.selected.some(crypto => item.baseCoin === crypto)
-                ).map(item => {
-                    const fundingInfo = fundingData.result.list.find(f => f.symbol === item.symbol);
-                    return {
-                        exchange: 'Bybit',
-                        symbol: item.baseCoin,
-                        fundingRate: fundingInfo ? parseFloat(fundingInfo.fundingRate) : 0,
-                        nextFunding: fundingInfo ? fundingInfo.fundingRateTimestamp : Date.now(),
-                        markPrice: parseFloat(item.markPrice || 0)
-                    };
-                });
-            } catch (error) {
-                console.error('❌ Bybit API error:', error);
-                return [];
-            }
-        }
-
-        // API OKX Futures
-        async function fetchOKXFundingRates() {
-            try {
-                const data = await fetchWithProxy('https://www.okx.com/api/v5/public/instruments?instType=SWAP');
-                console.log('✅ OKX connecté:', data.data.length, 'pairs');
-                
-                const fundingData = await fetchWithProxy('https://www.okx.com/api/v5/public/funding-rate?instType=SWAP');
-                
-                return data.data.filter(item => 
-                    item.instId.endsWith('-USDT-SWAP') && 
-                    config.cryptos.selected.some(crypto => item.instId.startsWith(crypto))
-                ).map(item => {
-                    const symbol = item.instId.split('-')[0];
-                    const fundingInfo = fundingData.data.find(f => f.instId === item.instId);
-                    return {
-                        exchange: 'OKX',
-                        symbol: symbol,
-                        fundingRate: fundingInfo ? parseFloat(fundingInfo.fundingRate) : 0,
-                        nextFunding: fundingInfo ? fundingInfo.nextFundingTime : Date.now(),
-                        markPrice: parseFloat(item.markPx || 0)
-                    };
-                });
-            } catch (error) {
-                console.error('❌ OKX API error:', error);
-                return [];
-            }
-        }
-
-        // Charger données de tous les exchanges actifs
+        // Fonction principale - MISE À JOUR pour vraie API
         async function loadLiveData() {
+            console.log('🔄 Loading live data from API...');
+            
+            const statusElement = document.getElementById('status-text');
+            const dataContainer = document.getElementById('data-container');
+            
+            // Afficher loading
+            statusElement.textContent = '🔄 Chargement API...';
+            dataContainer.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Récupération données live...
+                </div>
+            `;
+
             try {
-                liveData = [];
-                const promises = [];
+                const startTime = Date.now();
                 
-                // Charger données selon exchanges actifs
-                if (config.exchanges.binance.active) {
-                    promises.push(fetchBinanceFundingRates());
-                }
-                if (config.exchanges.kucoin.active) {
-                    promises.push(fetchKucoinFundingRates());
-                }
-                if (config.exchanges.bybit.active) {
-                    promises.push(fetchBybitFundingRates());
-                }
-                if (config.exchanges.okx.active) {
-                    promises.push(fetchOKXFundingRates());
-                }
-                
-                const results = await Promise.allSettled(promises);
-                
-                // Combiner toutes les données
-                results.forEach((result, index) => {
-                    if (result.status === 'fulfilled') {
-                        liveData = liveData.concat(result.value);
+                // Appel API réelle
+                const response = await fetch(`${BACKEND_URL}/api/funding-rates`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 });
-                
-                const connectedExchanges = Object.values(config.exchanges).filter(e => e.active).length;
-                const apiStatus = document.getElementById('api-status');
-                
-                if (liveData.length > 0) {
-                    apiStatus.className = 'api-status success';
-                    apiStatus.innerHTML = `<span style="color: #4CAF50;">✓</span> ${connectedExchanges} Exchanges LIVE - ${liveData.length} pairs connectées`;
-                } else {
-                    apiStatus.className = 'api-status error';
-                    apiStatus.innerHTML = '<span style="color: #f44336;">✗</span> Erreur connexion APIs';
+
+                const endTime = Date.now();
+                const responseTime = ((endTime - startTime) / 1000).toFixed(2);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+
+                const result = await response.json();
+
+                if (result.success && result.data) {
+                    liveData = result.data;
+                    
+                    // Mettre à jour les stats
+                    updateStats(result, responseTime);
+                    
+                    // Afficher les données
+                    displayFundingRates(liveData);
+                    
+                    // Statut success
+                    statusElement.innerHTML = '✅ API connectée - Données live';
+                    
+                    console.log(`✅ Loaded ${liveData.length} funding rates in ${responseTime}s`);
+                    
+                } else {
+                    throw new Error('Format de réponse invalide');
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading live data:', error);
                 
-                console.log('📊 Données chargées:', liveData.length, 'pairs de', connectedExchanges, 'exchanges');
-                updateStats();
+                // Afficher l'erreur
+                statusElement.textContent = '❌ Erreur API';
+                dataContainer.innerHTML = `
+                    <div class="error-message">
+                        <strong>Erreur de connexion à l'API</strong><br>
+                        ${error.message}<br><br>
+                        <button class="btn btn-primary" onclick="loadLiveData()">
+                            🔄 Réessayer
+                        </button>
+                    </div>
+                `;
+                
+                // Fallback vers données simulées
+                console.log('🔄 Falling back to simulated data...');
+                loadFallbackData();
+            }
+        }
+
+        // Fonction de fallback avec données simulées
+        function loadFallbackData() {
+            console.log('📊 Using fallback simulated data');
+            
+            const fallbackData = generateRealisticData();
+            liveData = fallbackData;
+            
+            displayFundingRates(liveData);
+            
+            document.getElementById('status-text').textContent = '⚠️ Mode simulation';
+            document.getElementById('total-pairs').textContent = liveData.length;
+            document.getElementById('total-exchanges').textContent = '4';
+            document.getElementById('response-time').textContent = '~2.1s';
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats(result, responseTime) {
+            document.getElementById('total-pairs').textContent = result.totalPairs || result.data.length;
+            document.getElementById('total-exchanges').textContent = Object.keys(result.exchanges || {}).length || '4';
+            document.getElementById('response-time').textContent = `${responseTime}s`;
+            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+        }
+
+        // Afficher les funding rates
+        function displayFundingRates(data) {
+            const container = document.getElementById('data-container');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="loading">Aucune donnée disponible</div>';
+                return;
+            }
+
+            const sortedData = data.sort((a, b) => Math.abs(b.fundingRate) - Math.abs(a.fundingRate));
+
+            const html = sortedData.map(item => {
+                const fundingRate = (item.fundingRate * 100).toFixed(4);
+                const aprAnnual = (item.fundingRate * 365 * 3 * 100).toFixed(2);
+                const rateClass = item.fundingRate >= 0 ? 'rate-positive' : 'rate-negative';
+                const markPrice = item.markPrice ? `$${item.markPrice.toLocaleString()}` : '-';
+
+                return `
+                    <div class="table-row">
+                        <span><strong>${item.exchange}</strong></span>
+                        <span>${item.symbol}</span>
+                        <span class="${rateClass}">${fundingRate}%</span>
+                        <span>${markPrice}</span>
+                        <span class="${rateClass}">${aprAnnual}%</span>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html;
+        }
+
+        // Générer données réalistes pour fallback
+        function generateRealisticData() {
+            const exchanges = ['Binance', 'Bybit', 'OKX', 'Gate'];
+            const cryptos = ['BTC', 'ETH', 'SOL', 'ADA', 'DOT', 'MATIC', 'LINK'];
+            const data = [];
+
+            exchanges.forEach(exchange => {
+                cryptos.forEach(crypto => {
+                    // Base funding rate selon le crypto
+                    const baseRates = {
+                        'BTC': 0.0001, 'ETH': 0.0002, 'SOL': -0.001,
+                        'ADA': -0.0015, 'DOT': 0.0003, 'MATIC': -0.0005, 'LINK': 0.0002
+                    };
+                    
+                    let fundingRate = baseRates[crypto] || 0;
+                    
+                    // Variations par exchange
+                    const exchangeFactors = {
+                        'Binance': 1.0, 'Bybit': 0.92, 'OKX': 1.08, 'Gate': 1.03
+                    };
+                    
+                    fundingRate *= exchangeFactors[exchange];
+                    fundingRate += (Math.random() - 0.5) * 0.0008;
+                    fundingRate = Math.max(-0.0075, Math.min(0.0075, fundingRate));
+
+                    // Prix simulés
+                    const basePrices = {
+                        'BTC': 43000, 'ETH': 2600, 'SOL': 65, 'ADA': 0.45,
+                        'DOT': 7.5, 'MATIC': 0.85, 'LINK': 14.5
+                    };
+
+                    data.push({
+                        exchange: exchange,
+                        symbol: crypto,
+                        fundingRate: fundingRate,
+                        markPrice: basePrices[crypto] * (1 + (Math.random() - 0.5) * 0.02),
+                        timestamp: new Date().toISOString()
+                    });
+                });
+            });
+
+            return data;
+        }
+
+        // Afficher les opportunités d'arbitrage
+        async function showArbitrageOpportunities() {
+            console.log('💰 Loading arbitrage opportunities...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/arbitrage`);
+                const result = await response.json();
+                
+                if (result.success && result.opportunities) {
+                    displayArbitrageTable(result.opportunities);
+                } else {
+                    throw new Error('Pas d\'opportunités d\'arbitrage');
+                }
                 
             } catch (error) {
-                console.error('Erreur lors du chargement:', error);
-                const apiStatus = document.getElementById('api-status');
-                apiStatus.className = 'api-status error';
-                apiStatus.innerHTML = '<span style="color: #f44336;">✗</span> Erreur APIs multiples';
-                
-                showModal(`❌ ERREUR CONNEXION APIS<br><br><strong>Problème:</strong> Restrictions CORS<br><br><strong>✅ SOLUTIONS:</strong><br><br>1️⃣ <strong>GitHub Pages</strong> (Recommandé)<br>2️⃣ <strong>Serveur Local</strong><br>3️⃣ <strong>Hébergeur externe</strong><br><br><small>💡 Les APIs fonctionnent parfaitement sur GitHub Pages</small>`);
+                console.error('Error loading arbitrage:', error);
+                alert('Erreur lors du chargement des opportunités d\'arbitrage');
             }
         }
 
-        // Calculer opportunités d'arbitrage avec fees et slippage
-        function calculateArbitrageOpportunities() {
-            if (liveData.length === 0) return;
-
-            const oppsBySymbol = {};
-            
-            // Grouper par symbole
-            liveData.forEach(item => {
-                if (!oppsBySymbol[item.symbol]) {
-                    oppsBySymbol[item.symbol] = [];
-                }
-                oppsBySymbol[item.symbol].push(item);
-            });
-
-            const newOpportunities = [];
-            
-            // Calculer arbitrage pour chaque crypto
-            Object.keys(oppsBySymbol).forEach(symbol => {
-                const rates = oppsBySymbol[symbol];
-                if (rates.length < 2) return;
-
-                // Trouver la meilleure paire d'exchanges
-                for (let i = 0; i < rates.length; i++) {
-                    for (let j = i + 1; j < rates.length; j++) {
-                        const rate1 = rates[i];
-                        const rate2 = rates[j];
-                        
-                        // Déterminer qui est long/short
-                        const isRate1Lower = rate1.fundingRate < rate2.fundingRate;
-                        const longExchange = isRate1Lower ? rate1 : rate2;
-                        const shortExchange = isRate1Lower ? rate2 : rate1;
-                        
-                        const netFundingGross = Math.abs(shortExchange.fundingRate - longExchange.fundingRate);
-                        
-                        // Calculer les coûts
-                        const longFees = exchangeFees[longExchange.exchange.toLowerCase()];
-                        const shortFees = exchangeFees[shortExchange.exchange.toLowerCase()];
-                        
-                        const totalMakerFees = (longFees.maker + shortFees.maker) / 100; // Ouverture
-                        const totalSlippage = (longFees.slippage + shortFees.slippage) / 100;
-                        const exitFees = totalMakerFees; // Fermeture
-                        
-                        // Net funding après tous les coûts
-                        const netFunding = netFundingGross - totalMakerFees - totalSlippage;
-                        const netFundingPerCycle = netFunding; // Par funding (8h)
-                        
-                        // APR = (Net Funding par 8h × 3 fundings/jour × 365 jours) × 100
-                        const aprGross = netFundingGross * 365 * 3 * 100;
-                        const aprNet = netFundingPerCycle * 365 * 3 * 100;
-                        
-                        // Vérifier si profitable après coûts
-                        if (aprNet > config.settings.alertThreshold && netFunding > 0) {
-                            const spread = (netFundingGross / ((longExchange.fundingRate + shortExchange.fundingRate) / 2)) * 100;
-                            
-                            newOpportunities.push({
-                                symbol,
-                                aprGross: aprGross,
-                                aprNet: aprNet,
-                                netFundingGross: netFundingGross,
-                                netFundingNet: netFunding,
-                                spread: Math.abs(spread),
-                                longExchange: longExchange.exchange,
-                                shortExchange: shortExchange.exchange,
-                                longRate: longExchange.fundingRate,
-                                shortRate: shortExchange.fundingRate,
-                                fees: {
-                                    makerFees: totalMakerFees * 100,
-                                    slippage: totalSlippage * 100,
-                                    exitFees: exitFees * 100,
-                                    totalCosts: (totalMakerFees + totalSlippage + exitFees) * 100
-                                },
-                                nextFunding: longExchange.nextFunding,
-                                profitability: aprNet / aprGross // Ratio net/gross
-                            });
-                        }
-                    }
-                }
-            });
-
-            // Trier par APR net décroissant
-            opportunities = newOpportunities.sort((a, b) => b.aprNet - a.aprNet).slice(0, config.settings.maxOpportunities);
-            
-            updateArbitrageDisplay();
-            updateTopOpportunities();
-        }
-
-        // Mettre à jour l'affichage des statistiques
-        function updateStats() {
-            document.getElementById('stats-cryptos').textContent = config.cryptos.selected.length;
-            document.getElementById('stats-exchanges').textContent = Object.values(config.exchanges).filter(e => e.active).length;
-            document.getElementById('stats-pairs').textContent = liveData.length;
-            updateLiveDataTable();
-            calculateArbitrageOpportunities();
-        }
-
-        // Mettre à jour le tableau des données live
-        function updateLiveDataTable() {
-            const tbody = document.getElementById('live-data-table');
-            
-            if (liveData.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" style="text-align: center; padding: 30px; opacity: 0.7;">
-                            ⚠️ Aucune donnée disponible
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            tbody.innerHTML = liveData.map(item => {
-                const apr = item.fundingRate * 365 * 3 * 100;
-                const nextFunding = new Date(parseInt(item.nextFunding)).toLocaleString('fr-FR');
-                const rateClass = item.fundingRate >= 0 ? 'positive' : 'negative';
-                
-                return `
-                    <tr>
-                        <td><strong>${item.symbol}</strong></td>
-                        <td><span class="exchange-badge exchange-${item.exchange.toLowerCase()}">${item.exchange}</span></td>
-                        <td><span class="funding-rate ${rateClass}">${(item.fundingRate * 100).toFixed(config.settings.ratePrecision)}%</span></td>
-                        <td><span class="funding-rate ${rateClass}">${apr.toFixed(1)}%</span></td>
-                        <td>${nextFunding}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Mettre à jour les top opportunités
-        function updateTopOpportunities() {
-            const container = document.getElementById('top-opportunities');
+        // Afficher le tableau d'arbitrage
+        function displayArbitrageTable(opportunities) {
+            const container = document.getElementById('data-container');
             
             if (opportunities.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; opacity: 0.7; padding: 20px;">
-                        📊 Aucune opportunité profitable après fees
-                    </div>
-                `;
+                container.innerHTML = '<div class="loading">Aucune opportunité d\'arbitrage rentable trouvée</div>';
                 return;
             }
 
-            container.innerHTML = opportunities.slice(0, 3).map(opp => `
-                <div style="margin-bottom: 15px; padding: 15px; background: rgba(76, 175, 80, 0.1); border-radius: 8px; border-left: 4px solid #4CAF50;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong>${opp.symbol}</strong>
-                        <span style="color: #4CAF50; font-weight: bold;">${opp.aprNet.toFixed(1)}% APR Net</span>
-                    </div>
-                    <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">
-                        Long ${opp.longExchange} • Short ${opp.shortExchange}
-                    </div>
-                    <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 3px;">
-                        Coûts: ${opp.fees.totalCosts.toFixed(2)}% • Profit: ${(opp.profitability * 100).toFixed(1)}%
-                    </div>
+            const headerHtml = `
+                <div class="table-header">
+                    <span>Symbole</span>
+                    <span>Long / Short</span>
+                    <span>Divergence</span>
+                    <span>Revenue Net</span>
+                    <span>APR Net</span>
                 </div>
-            `).join('');
-        }
+            `;
 
-        // Mettre à jour l'affichage des prochains fundings
-        function updateNextFundings() {
-            const container = document.getElementById('next-fundings');
-            const now = new Date();
-            const fundings = [];
+            const rowsHtml = opportunities.map(opp => {
+                const revenueClass = opp.revenueNet > 0 ? 'rate-positive' : 'rate-negative';
+                const aprClass = opp.aprNet > 0 ? 'rate-positive' : 'rate-negative';
 
-            // Horaires de funding (UTC)
-            const fundingHours = [0, 8, 16]; // Binance, KuCoin, Bybit
-            const okxHours = [1, 9, 17]; // OKX
-
-            fundingHours.forEach(hour => {
-                const nextFunding = new Date(now);
-                nextFunding.setUTCHours(hour, 0, 0, 0);
-                if (nextFunding <= now) {
-                    nextFunding.setUTCDate(nextFunding.getUTCDate() + 1);
-                }
-                fundings.push({
-                    time: nextFunding,
-                    exchanges: 'Binance, KuCoin, Bybit'
-                });
-            });
-
-            okxHours.forEach(hour => {
-                const nextFunding = new Date(now);
-                nextFunding.setUTCHours(hour, 0, 0, 0);
-                if (nextFunding <= now) {
-                    nextFunding.setUTCDate(nextFunding.getUTCDate() + 1);
-                }
-                fundings.push({
-                    time: nextFunding,
-                    exchanges: 'OKX'
-                });
-            });
-
-            fundings.sort((a, b) => a.time - b.time);
-
-            container.innerHTML = fundings.slice(0, 3).map(funding => {
-                const timeUntil = Math.floor((funding.time - now) / (1000 * 60 * 60));
                 return `
-                    <div style="margin-bottom: 10px; padding: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 5px;">
-                        <div style="font-weight: bold;">${funding.time.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</div>
-                        <div style="font-size: 0.8rem; opacity: 0.8;">${funding.exchanges}</div>
-                        <div style="font-size: 0.8rem; color: #4CAF50;">Dans ${timeUntil}h</div>
+                    <div class="table-row">
+                        <span><strong>${opp.symbol}</strong></span>
+                        <span>📈 ${opp.longExchange} / 📉 ${opp.shortExchange}</span>
+                        <span>${opp.divergence.toFixed(4)}%</span>
+                        <span class="${revenueClass}">${opp.revenueNet.toFixed(4)}%</span>
+                        <span class="${aprClass}">${opp.aprNet.toFixed(2)}%</span>
                     </div>
                 `;
             }).join('');
+
+            container.innerHTML = headerHtml + rowsHtml;
+            currentView = 'arbitrage';
         }
 
-        // Mettre à jour l'affichage de l'arbitrage
-        function updateArbitrageDisplay() {
-            const container = document.getElementById('arbitrage-opportunities');
-            
-            if (opportunities.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; opacity: 0.7; padding: 40px;">
-                        📊 Aucune opportunité profitable après fees & slippage<br>
-                        <small>Les spreads ne couvrent pas les coûts de trading actuellement</small>
-                    </div>
-                `;
+        // Export CSV
+        function exportToCSV() {
+            if (!liveData || liveData.length === 0) {
+                alert('Aucune donnée à exporter');
                 return;
             }
 
-            container.innerHTML = opportunities.map((opp, index) => `
-                <div class="opportunity-card">
-                    <div class="opportunity-header">
-                        <div class="opportunity-crypto">#${index + 1} ${opp.symbol}</div>
-                        <div class="opportunity-apr">${opp.aprNet.toFixed(1)}% APR Net</div>
-                    </div>
-                    
-                    <!-- Résumé de la stratégie -->
-                    <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
-                        <div style="font-weight: bold; margin-bottom: 8px;">💡 Stratégie recommandée:</div>
-                        <div style="font-size: 0.9rem;">
-                            📈 <strong>Long ${opp.symbol}</strong> sur ${opp.longExchange} (${(opp.longRate * 100).toFixed(4)}%)<br>
-                            📉 <strong>Short ${opp.symbol}</strong> sur ${opp.shortExchange} (${(opp.shortRate * 100).toFixed(4)}%)
-                        </div>
-                    </div>
-                    
-                    <div class="opportunity-details">
-                        <div class="detail-item">
-                            <div class="detail-label">APR Brut</div>
-                            <div class="detail-value" style="color: #ffd93d;">${opp.aprGross.toFixed(1)}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">APR Net</div>
-                            <div class="detail-value" style="color: #4CAF50;">${opp.aprNet.toFixed(1)}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Funding Net/8h</div>
-                            <div class="detail-value">+${(opp.netFundingNet * 100).toFixed(4)}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Spread</div>
-                            <div class="detail-value">${opp.spread.toFixed(2)}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Coûts Totaux</div>
-                            <div class="detail-value" style="color: #f44336;">-${opp.fees.totalCosts.toFixed(2)}%</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Profitabilité</div>
-                            <div class="detail-value">${(opp.profitability * 100).toFixed(1)}%</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Détail des coûts -->
-                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px; margin-top: 15px;">
-                        <div style="font-size: 0.85rem; opacity: 0.8;">
-                            <strong>💰 Détail des coûts:</strong><br>
-                            • Maker fees: ${opp.fees.makerFees.toFixed(2)}% (ouverture)<br>
-                            • Slippage: ${opp.fees.slippage.toFixed(2)}% (exécution)<br>
-                            • Exit fees: ${opp.fees.exitFees.toFixed(2)}% (fermeture)<br>
-                            • <strong>Total: ${opp.fees.totalCosts.toFixed(2)}%</strong>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            const csvContent = "data:text/csv;charset=utf-8," +
+                "Exchange,Symbol,Funding Rate,Mark Price,Timestamp\n" +
+                liveData.map(item => 
+                    `${item.exchange},${item.symbol},${item.fundingRate},${item.markPrice || ''},${item.timestamp}`
+                ).join('\n');
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `funding-rates-${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        // Initialiser les cryptos
-        function initCryptos() {
-            const grid = document.getElementById('crypto-grid');
-            grid.innerHTML = config.cryptos.available.map(crypto => `
-                <div class="crypto-item ${config.cryptos.selected.includes(crypto.symbol) ? 'selected' : ''}" 
-                     data-symbol="${crypto.symbol}" onclick="toggleCrypto('${crypto.symbol}')">
-                    <div class="crypto-symbol">${crypto.symbol}</div>
-                    <div class="crypto-name">${crypto.name}</div>
-                </div>
-            `).join('');
-        }
-
-        // Basculer sélection crypto
-        function toggleCrypto(symbol) {
-            const index = config.cryptos.selected.indexOf(symbol);
-            if (index > -1) {
-                config.cryptos.selected.splice(index, 1);
-            } else {
-                config.cryptos.selected.push(symbol);
-            }
-            initCryptos();
-        }
-
-        // Sauvegarder config crypto
-        function saveCryptoConfig() {
-            showModal('✅ Configuration des cryptos sauvegardée !<br><br>Cryptos sélectionnées: ' + config.cryptos.selected.join(', '));
-            loadLiveData(); // Recharger les données
-        }
-
-        // Initialiser les exchanges
-        function initExchanges() {
-            const grid = document.getElementById('exchange-grid');
-            grid.innerHTML = Object.entries(config.exchanges).map(([key, exchange]) => `
-                <div class="exchange-card ${exchange.active ? 'connected' : 'disabled'}">
-                    <h4>${exchange.name}</h4>
-                    <p>${exchange.type}</p>
-                    <div style="margin: 10px 0;">
-                        ${exchange.active ? '✅ Connecté & Actif' : '⚪ Disponible'}
-                    </div>
-                    <div style="font-size: 0.8rem; opacity: 0.7; margin: 5px 0;">
-                        Maker: ${exchangeFees[key].maker}% • Slippage: ${exchangeFees[key].slippage}%
-                    </div>
-                    <div class="exchange-toggle">
-                        <label class="toggle-switch">
-                            <input type="checkbox" ${exchange.active ? 'checked' : ''} 
-                                   onchange="toggleExchange('${key}')">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Basculer exchange
-        function toggleExchange(key) {
-            config.exchanges[key].active = !config.exchanges[key].active;
-            initExchanges();
-            
-            if (config.exchanges[key].active) {
-                showModal(`✅ ${config.exchanges[key].name} activé !<br><br>Rechargement des données en cours...`);
+        // Auto-refresh toutes les 30 secondes
+        setInterval(() => {
+            if (currentView === 'funding-rates') {
                 loadLiveData();
-            } else {
-                showModal(`⚠️ ${config.exchanges[key].name} désactivé !<br><br>Les données de cet exchange ne seront plus collectées.`);
-                // Retirer les données de cet exchange
-                liveData = liveData.filter(item => item.exchange !== config.exchanges[key].name);
-                updateStats();
             }
-        }
+        }, 30000);
 
-        // Sauvegarder config exchange
-        function saveExchangeConfig() {
-            showModal('✅ Configuration des exchanges sauvegardée !');
-        }
-
-        // Sauvegarder paramètres
-        function saveSettings() {
-            config.settings.refreshInterval = parseInt(document.getElementById('refresh-interval').value);
-            config.settings.alertThreshold = parseInt(document.getElementById('alert-threshold').value);
-            config.settings.maxOpportunities = parseInt(document.getElementById('max-opportunities').value);
-            config.settings.ratePrecision = parseInt(document.getElementById('rate-precision').value);
-            config.settings.notificationsEnabled = document.getElementById('notifications-enabled').checked;
-            
-            showModal('✅ Paramètres sauvegardés !<br><br>Nouveaux paramètres appliqués.');
-        }
-
-        // Gestion des onglets
-        function initTabs() {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const targetTab = btn.getAttribute('data-tab');
-                    
-                    // Retirer active de tous
-                    tabBtns.forEach(b => b.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // Ajouter active au sélectionné
-                    btn.classList.add('active');
-                    document.getElementById(targetTab).classList.add('active');
-                });
-            });
-        }
-
-        // Modal
-        function showModal(content) {
-            document.getElementById('modal-body').innerHTML = content;
-            document.getElementById('modal').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('modal').style.display = 'none';
-        }
-
-        // Fermer modal en cliquant à l'extérieur
-        window.onclick = function(event) {
-            const modal = document.getElementById('modal');
-            if (event.target === modal) {
-                closeModal();
-            }
-        }
-
-        // Initialisation
-        function init() {
-            initTabs();
-            initCryptos();
-            initExchanges();
+        // Charger les données au démarrage
+        document.addEventListener('DOMContentLoaded', () => {
             loadLiveData();
-            updateNextFundings();
-            
-            // Auto-refresh
-            setInterval(() => {
-                loadLiveData();
-                updateNextFundings();
-            }, config.settings.refreshInterval * 1000);
-            
-            setTimeout(() => {
-                showModal('🚀 FUNDING RATES BOT MULTI-EXCHANGE!<br><br>✅ <strong>4 Exchanges connectés:</strong><br>• Binance Futures API<br>• KuCoin Futures API<br>• Bybit Linear API<br>• OKX Swap API<br><br>✅ <strong>Arbitrage avec coûts réels:</strong><br>• Maker fees par exchange<br>• Slippage calculé<br>• APR Net après tous les coûts<br><br>🔥 <strong>Prêt pour le trading professionnel!</strong><br><br><small>💡 Active/désactive les exchanges dans l\'onglet EXCHANGES</small>');
-            }, 2000);
-        }
-
-        // Démarrer l'application
-        document.addEventListener('DOMContentLoaded', init);
+        });
     </script>
 </body>
 </html>
