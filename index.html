@@ -1,88 +1,4 @@
-// Données de démonstration - VERSION 3 EXCHANGES
-        const demoData = [
-            { symbol: 'BTC/USDT:USDT', binance: 0.0001, kucoin: 0.0003, bybit: 0.0002 },
-            { symbol: 'ETH/USDT:USDT', binance: 0.0005, kucoin: 0.0007, bybit: 0.0006 },
-            { symbol: 'SOL/USDT:USDT', binance: -0.0001, kucoin: -0.0003, bybit: -0.0002 },
-            { symbol: 'XRP/USDT:USDT', binance: -0.0076, kucoin: -0.0057, bybit: -0.0061 },
-            { symbol: 'DOGE/USDT:USDT', binance: 0.0058, kucoin: 0.0061, bybit: 0.0042 },
-            { symbol: 'ADA/USDT:USDT', binance: 0.0032, kucoin: 0.0038, bybit: 0.0025 },
-            { symbol: 'AVAX/USDT:USDT', binance: -0.0045, kucoin: -0.0052, bybit: -0.0041 },
-            { symbol: 'MATIC/USDT:USDT', binance: 0.0021, kucoin: 0.0018, bybit: 0.0024 },
-            { symbol: 'LINK/USDT:USDT', binance: -0.0033, kucoin: -0.0028, bybit: -0.0035 },
-            { symbol: 'DOT/USDT:USDT', binance: 0.        // Fonction pour récupérer les opportunités d'arbitrage - VERSION AVEC SIGNAUX
-        async function fetchArbitrageData() {
-            try {
-                console.log(`🎯 Fetching arbitrage data from: ${BACKEND_URL}/api/arbitrage`);
-                
-                const response = await fetch(`${BACKEND_URL}/api/arbitrage`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'omit'
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const responseData = await response.json();
-                console.log('🎯 Arbitrage response:', responseData);
-                
-                if (responseData.status === 'success') {
-                    arbitrageData = responseData.data || [];
-                    
-                    console.log(`✅ Loaded ${arbitrageData.length} arbitrage opportunities`);
-                    
-                    // Mettre à jour le timer de funding si disponible
-                    if (responseData.next_funding) {
-                        updateFundingTimer(responseData.next_funding);
-                    }
-                    
-                    renderArbitrageTable();
-                } else {
-                    throw new Error(responseData.message || 'Failed to fetch arbitrage data');
-                }
-                
-            } catch (error) {
-                console.error('❌ Failed to fetch arbitrage data:', error);
-                
-                // Utiliser des données démo d'arbitrage si échec
-                arbitrageData = [
-                    {
-                        symbol: 'BTC',
-                        strategy: 'Long/Short',
-                        longExchange: 'binance',
-                        shortExchange: 'bybit',
-                        longRate: 0.0001,
-                        shortRate: 0.0005,
-                        divergence_pct: 0.04,
-                        revenue_8h_pct: 0.03,
-                        revenue_annual_pct: 32.9,
-                        signal: '🟢 ENTRER MAINTENANT',
-                        signal_detail: 'Ouvrir position 6h30m avant funding'
-                    },
-                    {
-                        symbol: 'ETH',
-                        strategy: 'Long/Short',
-                        longExchange: 'okx',
-                        shortExchange: 'gate',
-                        longRate: 0.0002,
-                        shortRate: 0.0006,
-                        divergence_pct: 0.04,
-                        revenue_8h_pct: 0.03,
-                        revenue_annual_pct: 28.5,
-                        signal: '🟡 ENTRER BIENTÔT',
-                        signal_detail: 'Position à ouvrir dans 25m'
-                    }
-                ];
-                
-                renderArbitrageTable();
-            }
-        }
-                    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -96,718 +12,380 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             color: #333;
-            line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .header h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+            font-size: 2.5em;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header p {
-            color: #7f8c8d;
-            font-size: 14px;
-        }
-
-        .add-crypto-section {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .add-crypto-form {
+        .status-bar {
             display: flex;
-            gap: 15px;
+            justify-content: center;
             align-items: center;
+            gap: 30px;
             flex-wrap: wrap;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .input-group label {
+        .status {
+            padding: 12px 24px;
+            border-radius: 25px;
             font-weight: 600;
-            color: #2c3e50;
             font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .input-group input, .input-group select {
-            padding: 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 5px;
+        .status.connected {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .status.disconnected {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .last-update {
+            color: white;
             font-size: 14px;
-            min-width: 150px;
+            opacity: 0.9;
         }
 
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: #3498db;
-        }
-
-        .btn-add {
-            background: #27ae60;
+        .refresh-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
             border: none;
             padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: 600;
+            border-radius: 8px;
             cursor: pointer;
-            margin-top: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
 
-        .btn-add:hover {
-            background: #229954;
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
         }
 
         .section {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
-            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .section-header {
-            background: #34495e;
-            color: white;
-            padding: 15px 20px;
-            font-weight: 600;
-            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .section-header h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
         }
 
         .table-container {
             overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
         }
 
         th, td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
+            padding: 15px 20px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
         }
 
         th {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
             font-weight: 600;
-            color: #2c3e50;
-            text-align: center;
-        }
-
-        td {
-            text-align: center;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .symbol-cell {
-            text-align: left !important;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 16px;
             color: #2c3e50;
         }
 
-        .rate-positive {
+        .positive {
             color: #27ae60;
             font-weight: 600;
         }
 
-        .rate-negative {
+        .negative {
             color: #e74c3c;
             font-weight: 600;
         }
 
-        .rate-neutral {
+        .neutral {
             color: #7f8c8d;
-        }
-
-        .exchange-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .exchange-icon {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-        }
-
-        .binance { background: #f0b90b; }
-        .bybit { background: #0ecb81; }
-        .okx { background: #0d84f2; }
-        .bitget { background: #00d4aa; }
-        .gate { background: #8b5cf6; }
-        .coinex { background: #ff6b35; }
-
-        .arbitrage-row {
-            border-left: 4px solid #3498db;
-        }
-
-        .arbitrage-row:hover {
-            background: #f8f9fa;
-        }
-
-        .strategy-cell {
-            text-align: left !important;
-            max-width: 300px;
-        }
-
-        .position-long {
-            color: #27ae60;
-            font-size: 13px;
-            margin-bottom: 3px;
-        }
-
-        .position-short {
-            color: #e74c3c;
-            font-size: 13px;
-        }
-
-        .revenue-positive {
-            color: #27ae60;
-            font-weight: 600;
-        }
-
-        .revenue-negative {
-            color: #e74c3c;
-            font-weight: 600;
+            font-style: italic;
         }
 
         .loading {
             text-align: center;
-            padding: 40px;
             color: #7f8c8d;
+            font-style: italic;
+            padding: 30px;
         }
 
-        .status-indicator {
-            display: inline-flex;
+        .funding-timer {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            margin-left: 15px;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #27ae60;
+        .timer-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .timer-value {
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .timer-schedule {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .signal-cell {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .signal-enter {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .signal-soon {
+            background: linear-gradient(135deg, #FF9800, #f57c00);
+            color: white;
+        }
+
+        .signal-exit {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
+        .strategy-cell {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            font-size: 12px;
         }
 
         @media (max-width: 768px) {
-            .add-crypto-form {
-                flex-direction: column;
-                align-items: stretch;
+            .container {
+                padding: 10px;
             }
             
-            .input-group input, .input-group select {
-                min-width: 100%;
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .status-bar {
+                gap: 15px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .legend {
+                gap: 15px;
+            }
+            
+            th, td {
+                padding: 10px 8px;
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>💰 Funding Rates Monitor</h1>
-            <p>Track funding rates across major exchanges and identify arbitrage opportunities</p>
-            <div style="margin-top: 15px;">
-                <button id="toggle-mode-btn" onclick="toggleDataMode()" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin-right: 10px; cursor: pointer;">
-                    Switch to Real Data
-                </button>
-                <input type="text" id="backend-url" placeholder="Backend URL (optional)" style="padding: 8px; border: 2px solid #e9ecef; border-radius: 5px; margin-right: 10px; width: 250px;">
-                <span class="status-indicator">
-                    <div class="status-dot"></div>
-                    <span id="status-text">Demo Mode Active</span>
-                </span>
+            <div class="status-bar">
+                <div id="connection-status" class="status disconnected">Connecting...</div>
+                <div id="last-update" class="last-update">Never</div>
+                <button id="refresh-btn" class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
             </div>
         </div>
 
-        <!-- Add Crypto Section -->
-        <div class="add-crypto-section">
-            <h3 style="margin-bottom: 15px; color: #2c3e50;">Add Cryptocurrency</h3>
-            <div class="add-crypto-form">
-                <div class="input-group">
-                    <label for="crypto-symbol">Symbol</label>
-                    <input type="text" id="crypto-symbol" placeholder="BTC, ETH, SOL..." maxlength="10">
-                </div>
-                <div class="input-group">
-                    <label for="crypto-pair">Pair Type</label>
-                    <select id="crypto-pair">
-                        <option value="USDT">USDT Pair</option>
-                        <option value="USD">USD Pair</option>
-                        <option value="BUSD">BUSD Pair</option>
-                    </select>
-                </div>
-                <button class="btn-add" onclick="addCrypto()">Add to Monitor</button>
-            </div>
-        </div>
-
-        <!-- Funding Rates Table -->
         <div class="section">
-            <div class="section-header">
-                📊 Current Funding Rates
-                <span style="font-size: 14px; font-weight: normal; float: right;">
-                    Last updated: <span id="last-update">--:--</span>
-                </span>
-            </div>
-            <div class="table-container">
-                <table id="funding-rates-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align: left;">Symbol</th>
-                            <th>
-                                <div class="exchange-header">
-                                    <div class="exchange-icon binance"></div>
-                                    Binance
-                                </div>
-                            </th>
-                            <th>
-                                <div class="exchange-header">
-                                    <div class="exchange-icon bybit"></div>
-                                    Bybit
-                                </div>
-                            </th>
-                            <th>
-                                <div class="exchange-header">
-                                    <div class="exchange-icon okx"></div>
-                                    OKX
-                                </div>
-                            </th>
-                            <th>
-                                <div class="exchange-header">
-                                    <div class="exchange-icon bitget"></div>
-                                    Bitget
-                                </div>
-                            </th>
-                            <th>
-                                <div class="exchange-header">
-                                    <div class="exchange-icon gate"></div>
-                                    Gate.io
-                                </div>
-                            </th>
-                            <th>
-                                <div class="exchange-header">
-                                    <div class="exchange-icon coinex"></div>
-                                    CoinEx
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="funding-rates-body">
-                        <tr>
-                            <td colspan="7" class="loading">Loading funding rates...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="funding-rates-section">
+                <div class="section-header">
+                    <h2>📊 Current Funding Rates</h2>
+                    <div class="legend">
+                        <span><span class="legend-dot" style="background: #f39c12;"></span> Binance</span>
+                        <span><span class="legend-dot" style="background: #2ecc71;"></span> KuCoin</span>
+                        <span><span class="legend-dot" style="background: #3498db;"></span> Bybit</span>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="funding-table">
+                        <thead>
+                            <tr>
+                                <th>Symbol</th>
+                                <th>Binance</th>
+                                <th>KuCoin</th>
+                                <th>Bybit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="funding-rates-body">
+                            <tr><td colspan="4" class="loading">Loading funding rates...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
-        <!-- Top 5 Arbitrage Opportunities -->
         <div class="section">
-            <div class="section-header">
-                🎯 Top 5 Arbitrage Opportunities
-            </div>
-            <div class="table-container">
-                <table id="arbitrage-table">
-                    <thead>
-                        <tr>
-                            <th style="text-align: left;">Rank</th>
-                            <th style="text-align: left;">Symbol</th>
-                            <th style="text-align: left;">Strategy</th>
-                            <th>Divergence</th>
-                            <th>Commission</th>
-                            <th>Market Fees</th>
-                            <th>Slippage</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody id="arbitrage-body">
-                        <tr>
-                            <td colspan="8" class="loading">Calculating arbitrage opportunities...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="arbitrage-section">
+                <div class="section-header">
+                    <h2>🎯 Arbitrage Opportunities</h2>
+                    <div class="funding-timer" id="funding-timer">
+                        <span class="timer-label">Next Funding:</span>
+                        <span class="timer-value" id="timer-display">--:--:--</span>
+                        <span class="timer-schedule">Every 8h (00:00, 08:00, 16:00 UTC)</span>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="arbitrage-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Strategy</th>
+                                <th>Long @ Rate</th>
+                                <th>Short @ Rate</th>
+                                <th>Divergence</th>
+                                <th>Revenue/8h</th>
+                                <th>Revenue/Year</th>
+                                <th>Entry/Exit Signal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="arbitrage-body">
+                            <tr><td colspan="8" class="loading">Loading arbitrage opportunities...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         // Configuration
-        let BACKEND_URL = 'https://funding-rates-backend-l7mj.onrender.com'; // Votre vraie URL
+        const BACKEND_URL = 'https://funding-rates-backend-l7mj.onrender.com';
         let fundingRatesData = [];
-        let watchedSymbols = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE']; // Symboles par défaut
-        let useRealData = false; // Mode démo par défaut
+        let arbitrageData = [];
 
-        // Données de démonstration - VERSION 3 EXCHANGES
-        const demoData = [
-            { symbol: 'BTC/USDT:USDT', binance: 0.0001, kucoin: 0.0003, bybit: 0.0002 },
-            { symbol: 'ETH/USDT:USDT', binance: 0.0005, kucoin: 0.0007, bybit: 0.0006 },
-            { symbol: 'SOL/USDT:USDT', binance: -0.0001, kucoin: -0.0003, bybit: -0.0002 },
-            { symbol: 'XRP/USDT:USDT', binance: -0.0076, kucoin: -0.0057, bybit: -0.0061 },
-            { symbol: 'DOGE/USDT:USDT', binance: 0.0058, kucoin: 0.0061, bybit: 0.0042 },
-            { symbol: 'ADA/USDT:USDT', binance: 0.0032, kucoin: 0.0038, bybit: 0.0025 },
-            { symbol: 'AVAX/USDT:USDT', binance: -0.0045, kucoin: -0.0052, bybit: -0.0041 },
-            { symbol: 'MATIC/USDT:USDT', binance: 0.0021, kucoin: 0.0018, bybit: 0.0024 },
-            { symbol: 'LINK/USDT:USDT', binance: -0.0033, kucoin: -0.0028, bybit: -0.0035 },
-            { symbol: 'DOT/USDT:USDT', binance: 0.0015, kucoin: 0.0012, bybit: 0.0018 }
-        ];
+        // Status de connexion
+        function updateStatus(message, isConnected) {
+            const statusElement = document.getElementById('connection-status');
+            statusElement.textContent = message;
+            statusElement.className = isConnected ? 'status connected' : 'status disconnected';
+        }
 
-        // Fonctions utilitaires
+        // Formatage des taux
         function formatRate(rate) {
-            if (rate === null || rate === undefined) return 'N/A';
+            if (rate === null || rate === undefined) return '-';
             return (rate * 100).toFixed(4) + '%';
         }
 
+        // Classes CSS pour les taux
         function getRateClass(rate) {
-            if (rate === null || rate === undefined) return 'rate-neutral';
-            return rate > 0 ? 'rate-positive' : rate < 0 ? 'rate-negative' : 'rate-neutral';
+            if (rate === null || rate === undefined) return 'neutral';
+            return rate >= 0 ? 'positive' : 'negative';
         }
 
-        function updateStatus(message, isConnected = false, isDemoMode = false) {
-            document.getElementById('status-text').textContent = message;
-            const dot = document.querySelector('.status-dot');
-            if (isDemoMode) {
-                dot.style.background = '#f39c12'; // Orange pour le mode démo
-            } else {
-                dot.style.background = isConnected ? '#27ae60' : '#e74c3c';
-            }
-        }
-
-        // Fonction pour basculer entre mode démo et réel
-        function toggleDataMode() {
-            useRealData = !useRealData;
-            const btn = document.getElementById('toggle-mode-btn');
-            
-            if (useRealData) {
-                btn.textContent = 'Switch to Demo Mode';
-                btn.style.background = '#e67e22';
-                
-                // Récupérer l'URL personnalisée si fournie
-                const customUrl = document.getElementById('backend-url').value.trim();
-                if (customUrl) {
-                    BACKEND_URL = customUrl;
-                }
-                
-                fetchRealData();
-            } else {
-                btn.textContent = 'Switch to Real Data';
-                btn.style.background = '#3498db';
-                loadDemoData();
-            }
-        }
-
-        // Charger les données de démo
-        function loadDemoData() {
-            fundingRatesData = [...demoData];
-            updateStatus('Demo Mode Active', false, true);
-            
-            // Ajouter un peu de fluctuation pour simuler des données live
-            fundingRatesData.forEach(item => {
-                ['binance', 'bybit', 'okx', 'bitget', 'gate', 'coinex'].forEach(exchange => {
-                    if (item[exchange] !== null && item[exchange] !== undefined) {
-                        item[exchange] += (Math.random() - 0.5) * 0.002; // Fluctuation de ±0.1%
-                    }
-                });
-            });
-            
-            renderFundingRatesTable();
-            calculateAndRenderArbitrage();
-        }
-
+        // Mise à jour du temps de dernière actualisation
         function updateLastUpdateTime() {
             const now = new Date();
-            document.getElementById('last-update').textContent = now.toLocaleTimeString();
-        }
-
-        // Fonction pour ajouter une crypto
-        function addCrypto() {
-            const symbolInput = document.getElementById('crypto-symbol');
-            const pairSelect = document.getElementById('crypto-pair');
-            
-            const symbol = symbolInput.value.trim().toUpperCase();
-            const pair = pairSelect.value;
-            
-            if (!symbol) {
-                alert('Please enter a cryptocurrency symbol');
-                return;
-            }
-            
-            const fullSymbol = `${symbol}/${pair}:${pair}`;
-            
-            // Vérifier si déjà ajouté
-            if (watchedSymbols.includes(symbol)) {
-                alert(`${symbol} is already being monitored`);
-                return;
-            }
-            
-            // Ajouter à la liste
-            watchedSymbols.push(symbol);
-            
-            // Simuler des données pour la démo
-            const newData = {
-                symbol: fullSymbol,
-                binance: (Math.random() - 0.5) * 0.02,
-                bybit: (Math.random() - 0.5) * 0.02,
-                okx: (Math.random() - 0.5) * 0.02,
-                bitget: (Math.random() - 0.5) * 0.02,
-                gate: (Math.random() - 0.5) * 0.02,
-                coinex: (Math.random() - 0.5) * 0.02
-            };
-            
-            fundingRatesData.push(newData);
-            
-            // Effacer le formulaire
-            symbolInput.value = '';
-            
-            // Mettre à jour l'affichage
-            renderFundingRatesTable();
-            calculateAndRenderArbitrage();
-            
-            console.log(`Added ${symbol} to monitoring`);
-        }
-
-        // Rendu de la table des funding rates - VERSION CORRIGEE
-        function renderFundingRatesTable() {
-            const tbody = document.getElementById('funding-rates-body');
-            
-            console.log('🎨 Rendering table with', fundingRatesData.length, 'symbols');
-            
-            if (fundingRatesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="loading">No data available - Check console for details</td></tr>';
-                return;
-            }
-            
-            const rows = fundingRatesData.map((item, index) => {
-                const cleanSymbol = item.symbol ? item.symbol.split('/')[0] : `Symbol_${index}`;
-                
-                // Debug chaque ligne
-                console.log(`📊 Row ${index} - ${cleanSymbol}:`, {
-                    symbol: item.symbol,
-                    binance: typeof item.binance + ' = ' + item.binance,
-                    bybit: typeof item.bybit + ' = ' + item.bybit,
-                    okx: typeof item.okx + ' = ' + item.okx,
-                    gate: typeof item.gate + ' = ' + item.gate
-                });
-                
-                return `
-                    <tr>
-                        <td class="symbol-cell">${cleanSymbol}</td>
-                        <td class="${getRateClass(item.binance)}">${formatRate(item.binance)}</td>
-                        <td class="${getRateClass(item.kucoin)}">${formatRate(item.kucoin)}</td>
-                        <td class="${getRateClass(item.bybit)}">${formatRate(item.bybit)}</td>
-                    </tr>
-                `;
-            }).join('');
-            
-            tbody.innerHTML = rows;
-            updateLastUpdateTime();
-            console.log('✅ Table rendered successfully with', rows.split('<tr>').length - 1, 'rows');
-        }
-
-        // Calcul et rendu des opportunités d'arbitrage
-        function calculateAndRenderArbitrage() {
-            const exchanges = ['binance', 'bybit', 'okx', 'bitget', 'gate', 'coinex'];
-            const opportunities = [];
-            
-            fundingRatesData.forEach(item => {
-                const rates = [];
-                
-                exchanges.forEach(ex => {
-                    if (item[ex] !== null && item[ex] !== undefined) {
-                        rates.push({ exchange: ex, rate: item[ex] });
-                    }
-                });
-                
-                if (rates.length >= 2) {
-                    rates.sort((a, b) => a.rate - b.rate);
-                    
-                    const longEx = rates[0];
-                    const shortEx = rates[rates.length - 1];
-                    const divergence = shortEx.rate - longEx.rate;
-                    const commission = 0.002; // 0.2% commission basée sur votre code
-                    const marketFees = 0.001; // 0.1% market fees
-                    const slippage = 0.0005; // 0.05% slippage estimé
-                    const revenue = (divergence * 100) - commission - marketFees - slippage;
-                    
-                    if (Math.abs(divergence) > 0.001) { // Seuil minimum
-                        opportunities.push({
-                            symbol: item.symbol.split('/')[0],
-                            longExchange: longEx.exchange,
-                            shortExchange: shortEx.exchange,
-                            longRate: longEx.rate,
-                            shortRate: shortEx.rate,
-                            divergence: divergence * 100,
-                            commission: commission,
-                            marketFees: marketFees,
-                            slippage: slippage,
-                            revenue: revenue
-                        });
-                    }
-                }
-            });
-            
-            // Trier par revenue décroissant
-            opportunities.sort((a, b) => Math.abs(b.revenue) - Math.abs(a.revenue));
-            
-            // Prendre le top 5
-            const top5 = opportunities.slice(0, 5);
-            
-            renderArbitrageTable(top5);
-        }
-
-        function renderArbitrageTable(opportunities) {
-            const tbody = document.getElementById('arbitrage-body');
-            
-            if (opportunities.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" class="loading">No arbitrage opportunities found</td></tr>';
-                return;
-            }
-            
-            const exchangeNames = {
-                binance: 'Binance',
-                bybit: 'Bybit',
-                okx: 'OKX',
-                bitget: 'Bitget',
-                gate: 'Gate.io',
-                coinex: 'CoinEx'
-            };
-            
-            const rows = opportunities.map((opp, index) => {
-                const revenueClass = opp.revenue > 0 ? 'revenue-positive' : 'revenue-negative';
-                
-                return `
-                    <tr class="arbitrage-row">
-                        <td style="text-align: left; font-weight: 600;">#${index + 1}</td>
-                        <td class="symbol-cell">${opp.symbol}</td>
-                        <td class="strategy-cell">
-                            <div class="position-long">LONG ${exchangeNames[opp.longExchange]} (${formatRate(opp.longRate)})</div>
-                            <div class="position-short">SHORT ${exchangeNames[opp.shortExchange]} (${formatRate(opp.shortRate)})</div>
-                        </td>
-                        <td class="rate-positive">${opp.divergence.toFixed(4)}%</td>
-                        <td>${(opp.commission * 100).toFixed(3)}%</td>
-                        <td>${(opp.marketFees * 100).toFixed(3)}%</td>
-                        <td>${(opp.slippage * 100).toFixed(3)}%</td>
-                        <td class="${revenueClass}">${opp.revenue.toFixed(4)}%</td>
-                    </tr>
-                `;
-            }).join('');
-            
-            tbody.innerHTML = rows;
-        }
-
-        // Fonction pour récupérer les données réelles - VERSION CORRIGEE
-        async function fetchRealData() {
-            try {
-                updateStatus('Connecting to backend...', false);
-                
-                const fullUrl = `${BACKEND_URL}/api/funding-rates`;
-                console.log(`🔄 Fetching from: ${fullUrl}`);
-                
-                const response = await fetch(fullUrl, {
-                    method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'omit'
-                });
-                
-                console.log(`📡 Response status: ${response.status}`);
-                console.log(`📡 Response headers:`, [...response.headers.entries()]);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const responseData = await response.json();
-                console.log('📦 Raw backend response:', responseData);
-                
-                if (responseData.status !== 'success') {
-                    throw new Error(`Backend error: ${responseData.message || 'Unknown error'}`);
-                }
-                
-                if (!responseData.data || responseData.data.length === 0) {
-                    console.warn('⚠️ Backend returned empty data, using demo data');
-                    updateStatus('🟡 Backend online but no data - using demo', false);
-                    loadDemoData();
-                    return;
-                }
-                
-                // Traiter les données du backend
-                console.log(`📊 Processing ${responseData.data.length} raw items from backend`);
-                fundingRatesData = processBackendData(responseData.data);
-                
-                if (fundingRatesData.length === 0) {
-                    console.warn('⚠️ No symbols after processing, using demo data');
-                    updateStatus('🟡 Data processing issue - using demo', false);
-                    loadDemoData();
-                    return;
-                }
-                
-                updateStatus(`🟢 Live Data: ${fundingRatesData.length} symbols`, true);
-                
-                renderFundingRatesTable();
-                calculateAndRenderArbitrage();
-                
-                console.log('🎉 Real data successfully loaded and displayed');
-                
-            } catch (error) {
-                console.error('❌ Failed to fetch real data:', error);
-                console.error('❌ Error details:', {
-                    name: error.name,
-                    message: error.message,
-                    stack: error.stack
-                });
-                
-                let errorMessage = 'Connection Failed';
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    errorMessage = 'CORS/Network Error';
-                } else if (error.name === 'AbortError') {
-                    errorMessage = 'Request Timeout';
-                } else if (error.message.includes('HTTP')) {
-                    errorMessage = `Backend Error: ${error.message}`;
-                }
-                
-                updateStatus(`🔴 ${errorMessage} - Using Demo`, false);
-                
-                // Revenir au mode démo automatiquement
-                useRealData = false;
-                const btn = document.getElementById('toggle-mode-btn');
-                if (btn) {
-                    btn.textContent = 'Switch to Real Data';
-                    btn.style.background = '#3498db';
-                }
-                
-                loadDemoData();
-            }
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('last-update').textContent = `Updated: ${timeString}`;
         }
 
         function processBackendData(data) {
@@ -851,43 +429,279 @@
             return result;
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('💰 Funding Rates Monitor loaded');
-            
-            // Démarrer en mode démo
-            loadDemoData();
-            
-            // Actualiser automatiquement selon le mode
-            setInterval(() => {
-                if (useRealData) {
-                    fetchRealData();
-                } else {
-                    // Rafraîchir les données démo avec de légères fluctuations
-                    loadDemoData();
+        // Fonction pour récupérer les données - VERSION SIMPLIFIÉE
+        async function fetchFundingRates() {
+            try {
+                updateStatus('🔄 Fetching live data...', false);
+                
+                const fullUrl = `${BACKEND_URL}/api/funding-rates`;
+                console.log(`🔄 Fetching from: ${fullUrl}`);
+                
+                const response = await fetch(fullUrl, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'omit'
+                });
+                
+                console.log(`📡 Response status: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
-            }, 30000); // Toutes les 30 secondes
-            
-            // Gérer la touche Entrée dans le champ de saisie
-            document.getElementById('crypto-symbol').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    addCrypto();
+                
+                const responseData = await response.json();
+                console.log('📦 Backend response:', responseData);
+                
+                if (responseData.status !== 'success') {
+                    throw new Error(`Backend error: ${responseData.message || 'Unknown error'}`);
                 }
-            });
+                
+                if (!responseData.data || responseData.data.length === 0) {
+                    console.warn('⚠️ Backend returned empty data');
+                    updateStatus('🟡 No data available yet', false);
+                    return;
+                }
+                
+                // Traiter les données du backend
+                console.log(`📊 Processing ${responseData.data.length} raw items from backend`);
+                fundingRatesData = processBackendData(responseData.data);
+                
+                if (fundingRatesData.length === 0) {
+                    console.warn('⚠️ No symbols after processing');
+                    updateStatus('🟡 Data processing issue', false);
+                    return;
+                }
+                
+                updateStatus(`🟢 Live: ${fundingRatesData.length} symbols`, true);
+                
+                renderFundingRatesTable();
+                fetchArbitrageData();
+                
+                console.log('🎉 Data successfully loaded and displayed');
+                
+            } catch (error) {
+                console.error('❌ Failed to fetch data:', error);
+                
+                let errorMessage = 'Connection Failed';
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Backend Offline';
+                } else if (error.message.includes('HTTP')) {
+                    errorMessage = `Backend Error: ${error.message}`;
+                }
+                
+                updateStatus(`🔴 ${errorMessage}`, false);
+            }
+        }
+
+        // Mise à jour du timer de funding
+        function updateFundingTimer(nextFundingData) {
+            if (!nextFundingData || !nextFundingData.next_funding_utc) return;
             
-            // Gérer la touche Entrée dans le champ URL backend
-            document.getElementById('backend-url').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && useRealData) {
-                    const customUrl = this.value.trim();
-                    if (customUrl) {
-                        BACKEND_URL = customUrl;
-                        fetchRealData();
+            const nextFunding = new Date(nextFundingData.next_funding_utc);
+            const now = new Date();
+            const diff = nextFunding - now;
+            
+            if (diff <= 0) {
+                document.getElementById('timer-display').textContent = '00:00:00';
+                return;
+            }
+            
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = display;
+        }
+
+        // Rendu de la table des funding rates
+        function renderFundingRatesTable() {
+            const tbody = document.getElementById('funding-rates-body');
+            
+            console.log('🎨 Rendering table with', fundingRatesData.length, 'symbols');
+            
+            if (fundingRatesData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="loading">No data available - Check console for details</td></tr>';
+                return;
+            }
+            
+            const rows = fundingRatesData.map((item, index) => {
+                const cleanSymbol = item.symbol ? item.symbol.split('/')[0] : `Symbol_${index}`;
+                
+                // Debug chaque ligne
+                console.log(`📊 Row ${index} - ${cleanSymbol}:`, {
+                    symbol: item.symbol,
+                    binance: typeof item.binance + ' = ' + item.binance,
+                    kucoin: typeof item.kucoin + ' = ' + item.kucoin,
+                    bybit: typeof item.bybit + ' = ' + item.bybit
+                });
+                
+                return `
+                    <tr>
+                        <td class="symbol-cell">${cleanSymbol}</td>
+                        <td class="${getRateClass(item.binance)}">${formatRate(item.binance)}</td>
+                        <td class="${getRateClass(item.kucoin)}">${formatRate(item.kucoin)}</td>
+                        <td class="${getRateClass(item.bybit)}">${formatRate(item.bybit)}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            tbody.innerHTML = rows;
+            updateLastUpdateTime();
+            console.log('✅ Table rendered successfully with', rows.split('<tr>').length - 1, 'rows');
+        }
+
+        // Fonction pour récupérer les opportunités d'arbitrage
+        async function fetchArbitrageData() {
+            try {
+                console.log(`🎯 Fetching arbitrage data from: ${BACKEND_URL}/api/arbitrage`);
+                
+                const response = await fetch(`${BACKEND_URL}/api/arbitrage`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'omit'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const responseData = await response.json();
+                console.log('🎯 Arbitrage response:', responseData);
+                
+                if (responseData.status === 'success') {
+                    arbitrageData = responseData.data || [];
+                    
+                    console.log(`✅ Loaded ${arbitrageData.length} arbitrage opportunities`);
+                    
+                    // Mettre à jour le timer de funding si disponible
+                    if (responseData.next_funding) {
+                        updateFundingTimer(responseData.next_funding);
                     }
+                    
+                    renderArbitrageTable();
+                } else {
+                    throw new Error(responseData.message || 'Failed to fetch arbitrage data');
                 }
-            });
+                
+            } catch (error) {
+                console.error('❌ Failed to fetch arbitrage data:', error);
+                
+                // Pas de fallback - juste afficher qu'il n'y a pas de données
+                arbitrageData = [];
+                renderArbitrageTable();
+            }
+        }
+
+        // Rendu de la table d'arbitrage
+        function renderArbitrageTable() {
+            const tbody = document.getElementById('arbitrage-body');
             
-            console.log('✅ Interface ready - Demo mode active');
-            console.log('🔧 Click "Switch to Real Data" when your backend is ready');
+            if (arbitrageData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">No arbitrage opportunities found</td></tr>';
+                return;
+            }
+            
+            const rows = arbitrageData.map(item => {
+                // Classes CSS pour les signaux
+                let signalClass = 'signal-cell ';
+                if (item.signal && item.signal.includes('ENTRER MAINTENANT')) {
+                    signalClass += 'signal-enter';
+                } else if (item.signal && item.signal.includes('BIENTÔT')) {
+                    signalClass += 'signal-soon';
+                } else if (item.signal && item.signal.includes('SORTIR')) {
+                    signalClass += 'signal-exit';
+                } else {
+                    signalClass += 'signal-enter'; // défaut
+                }
+                
+                return `
+                    <tr>
+                        <td class="symbol-cell">${item.symbol}</td>
+                        <td class="strategy-cell">${item.strategy || 'Long/Short'}</td>
+                        <td>${item.longExchange} @ ${formatRate(item.longRate)}</td>
+                        <td>${item.shortExchange} @ ${formatRate(item.shortRate)}</td>
+                        <td class="positive">${(item.divergence_pct || item.divergence * 100).toFixed(3)}%</td>
+                        <td class="positive">${(item.revenue_8h_pct || item.revenue_8h * 100).toFixed(3)}%</td>
+                        <td class="positive">${(item.revenue_annual_pct || item.revenue * 100).toFixed(1)}%</td>
+                        <td class="${signalClass}">
+                            <div>${item.signal || '🟢 ENTRER'}</div>
+                            <div style="font-size: 10px; margin-top: 2px;">${item.signal_detail || ''}</div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            tbody.innerHTML = rows;
+        }
+
+        // Fonction principale pour charger toutes les données
+        async function loadData() {
+            await fetchFundingRates();
+            
+            // Démarrer le timer de mise à jour du funding
+            setInterval(() => {
+                // Mettre à jour le timer toutes les 10 secondes
+                fetch(`${BACKEND_URL}/api/status`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.next_funding) {
+                            updateFundingTimer(data.next_funding);
+                        }
+                    })
+                    .catch(() => {}); // Ignore les erreurs silencieusement
+            }, 10000); // Toutes les 10 secondes
+            
+            // Timer visuel en temps réel
+            setInterval(() => {
+                const timerElement = document.getElementById('timer-display');
+                if (timerElement && timerElement.textContent !== '--:--:--') {
+                    // Décrémenter d'une seconde
+                    const parts = timerElement.textContent.split(':');
+                    let hours = parseInt(parts[0]);
+                    let minutes = parseInt(parts[1]);
+                    let seconds = parseInt(parts[2]);
+                    
+                    seconds--;
+                    if (seconds < 0) {
+                        seconds = 59;
+                        minutes--;
+                        if (minutes < 0) {
+                            minutes = 59;
+                            hours--;
+                            if (hours < 0) {
+                                hours = 0;
+                                minutes = 0;
+                                seconds = 0;
+                            }
+                        }
+                    }
+                    
+                    const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    timerElement.textContent = display;
+                }
+            }, 1000); // Chaque seconde
+            
+            // Auto-refresh toutes les 3 minutes
+            setInterval(() => {
+                console.log('🔄 Auto-refresh...');
+                fetchFundingRates();
+            }, 180000); // 3 minutes
+        }
+
+        // Initialisation au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Funding Rates Monitor - Live Mode Only');
+            updateStatus('🔄 Initializing...', false);
+            loadData();
         });
     </script>
 </body>
