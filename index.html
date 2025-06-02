@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funding Rates Monitor - Direct Exchanges</title>
+    <title>Funding Rates Monitor - PythonAnywhere Live</title>
     <style>
         * {
             margin: 0;
@@ -362,6 +362,16 @@
             color: white;
         }
 
+        .pythonanywhere-badge {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -407,11 +417,12 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>💰 Funding Rates Monitor - Direct Exchanges</h1>
+            <h1>💰 Funding Rates Monitor - Live Data</h1>
             <div class="status-bar">
-                <div id="connection-status" class="status disconnected">Connecting...</div>
+                <div id="connection-status" class="status disconnected">Connecting to PythonAnywhere...</div>
+                <div class="pythonanywhere-badge">🐍 Powered by PythonAnywhere</div>
                 <div id="last-update" class="last-update">Never</div>
-                <button id="refresh-btn" class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+                <button id="refresh-btn" class="refresh-btn" onclick="forceRefresh()">🔄 Refresh</button>
             </div>
         </div>
 
@@ -428,7 +439,7 @@
                 >
                 <button onclick="addCrypto()" class="add-btn">➕ Add Symbol</button>
                 <span style="color: #666; font-size: 12px;">
-                    Direct APIs: Binance, KuCoin, Bybit, OKX<br>
+                    Live APIs: Binance, KuCoin, Bybit, OKX<br>
                     <small style="color: #999;">⚠️ Symbols reset on page reload (session only)</small>
                 </span>
             </div>
@@ -441,6 +452,7 @@
         <div class="section">
             <div class="section-header">
                 <h2>🔗 Exchange Status</h2>
+                <div style="color: #666; font-size: 12px;">Backend: MarcR1993.pythonanywhere.com</div>
             </div>
             <div class="exchange-status" id="exchange-status">
                 <div class="exchange-badge offline">
@@ -481,7 +493,7 @@
                             </tr>
                         </thead>
                         <tbody id="funding-rates-body">
-                            <tr><td colspan="5" class="loading">Loading funding rates...</td></tr>
+                            <tr><td colspan="5" class="loading">Connecting to PythonAnywhere backend...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -522,38 +534,26 @@
     </div>
 
     <script>
-        // Configuration - Choisissez votre URL backend
-        const BACKEND_CONFIGS = {
-            local: 'http://localhost:5000',
-            heroku: 'https://your-app.herokuapp.com',
-            render: 'https://your-app.onrender.com',
-            railway: 'https://your-app.up.railway.app'
-        };
-        
-        // Changez ici pour utiliser un autre backend
-        const BACKEND_URL = BACKEND_CONFIGS.local; // Changez en .heroku, .render, etc.
+        // 🚀 Configuration PythonAnywhere - URL de votre backend
+        const BACKEND_URL = 'https://MarcR1993.pythonanywhere.com';
         
         let fundingRatesData = [];
         let arbitrageData = [];
-        let trackedSymbols = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'MATIC', 'LINK', 'DOT']; // Symboles par défaut
+        let trackedSymbols = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'MATIC', 'LINK', 'DOT'];
         let connectionRetries = 0;
         const MAX_RETRIES = 3;
 
-        // Note importante sur la sauvegarde
-        console.log('ℹ️ Note: Dans cet environnement, les symboles ajoutés seront conservés uniquement pendant cette session.');
-        console.log('🔗 Tentative de connexion au backend:', BACKEND_URL);
-        console.log('💡 Backends disponibles:', Object.keys(BACKEND_CONFIGS));
+        console.log('🚀 Funding Rates Monitor - PythonAnywhere Edition');
+        console.log('🔗 Backend URL:', BACKEND_URL);
+        console.log('📊 Tracked symbols:', trackedSymbols);
 
         // Charger les symboles sauvegardés (en mémoire seulement)
         function loadTrackedSymbols() {
-            // Note: localStorage n'est pas disponible dans certains environnements
-            // Les symboles seront sauvegardés seulement pendant la session
             updateTrackedSymbolsDisplay();
         }
 
         // Sauvegarder les symboles (en mémoire seulement)
         function saveTrackedSymbols() {
-            // Note: Sauvegarde en mémoire uniquement pour cette session
             console.log('💾 Symbols saved in memory:', trackedSymbols);
         }
 
@@ -630,19 +630,19 @@
         // Fonction de test de connectivité backend
         async function testBackendConnectivity() {
             try {
-                updateStatus('🔍 Testing backend connectivity...', false);
+                updateStatus('🔍 Testing PythonAnywhere connectivity...', false);
                 
                 const response = await fetch(`${BACKEND_URL}/health`, {
                     method: 'GET',
                     mode: 'cors',
                     headers: { 'Accept': 'application/json' },
                     credentials: 'omit',
-                    signal: AbortSignal.timeout(5000) // Timeout 5 secondes
+                    signal: AbortSignal.timeout(10000) // Timeout 10 secondes
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    updateStatus('✅ Backend connected', true);
+                    updateStatus('✅ PythonAnywhere connected', true);
                     console.log('✅ Backend health check passed:', data);
                     connectionRetries = 0;
                     return true;
@@ -656,9 +656,9 @@
                 connectionRetries++;
                 
                 if (error.name === 'TimeoutError') {
-                    updateStatus('🔴 Backend timeout', false, true);
+                    updateStatus('🔴 PythonAnywhere timeout', false, true);
                 } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    updateStatus('🔴 Backend not running', false, true);
+                    updateStatus('🔴 PythonAnywhere not responding', false, true);
                 } else {
                     updateStatus(`🔴 Backend error: ${error.message}`, false, true);
                 }
@@ -766,7 +766,7 @@
                     return;
                 }
                 
-                updateStatus('🔄 Fetching live data...', false);
+                updateStatus('🔄 Fetching live data from PythonAnywhere...', false);
                 
                 const fullUrl = `${BACKEND_URL}/api/funding-rates`;
                 console.log(`🔄 Fetching from: ${fullUrl}`);
@@ -779,7 +779,7 @@
                         'Content-Type': 'application/json',
                     },
                     credentials: 'omit',
-                    signal: AbortSignal.timeout(10000) // Timeout 10 secondes
+                    signal: AbortSignal.timeout(15000) // Timeout 15 secondes
                 });
                 
                 console.log(`📡 Response status: ${response.status}`);
@@ -816,16 +816,16 @@
                 renderFundingRatesTable();
                 fetchArbitrageData();
                 
-                console.log('🎉 Data successfully loaded and displayed');
+                console.log('🎉 Data successfully loaded from PythonAnywhere');
                 
             } catch (error) {
                 console.error('❌ Failed to fetch data:', error);
                 
                 let errorMessage = 'Connection Failed';
                 if (error.name === 'TimeoutError') {
-                    errorMessage = 'Backend Timeout';
+                    errorMessage = 'PythonAnywhere Timeout';
                 } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Backend Offline';
+                    errorMessage = 'PythonAnywhere Offline';
                 } else if (error.message.includes('HTTP')) {
                     errorMessage = `Backend Error: ${error.message}`;
                 }
@@ -854,10 +854,10 @@
                 {
                     symbol: 'BTC',
                     strategy: 'Long/Short',
-                    longExchange: 'binance',
-                    shortExchange: 'okx',
-                    longRate: 0.0001,
-                    shortRate: 0.0003,
+                    longExchange: 'okx',
+                    shortExchange: 'binance',
+                    longRate: 0.0003,
+                    shortRate: 0.0001,
                     divergence_pct: 0.02,
                     revenue_8h_pct: 0.012,
                     revenue_annual_pct: 15.8,
@@ -866,7 +866,7 @@
                 }
             ];
             
-            updateStatus('📝 Example Data (Backend Offline)', false);
+            updateStatus('📝 Example Data (PythonAnywhere Offline)', false);
             renderFundingRatesTable();
             renderArbitrageTable();
             
@@ -1017,7 +1017,7 @@
         // Test de connectivité des exchanges
         async function testExchanges() {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/test-exchanges`, {
+                const response = await fetch(`${BACKEND_URL}/api/status`, {
                     method: 'GET',
                     mode: 'cors',
                     headers: {
@@ -1029,8 +1029,8 @@
                 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.results && data.results.exchanges) {
-                        updateExchangeStatus(data.results.exchanges);
+                    if (data.exchange_status) {
+                        updateExchangeStatus(data.exchange_status);
                     }
                 }
             } catch (error) {
@@ -1101,8 +1101,9 @@
         // Fonction pour forcer une mise à jour
         async function forceRefresh() {
             try {
-                updateStatus('🔄 Force refreshing...', false);
+                updateStatus('🔄 Force refreshing from PythonAnywhere...', false);
                 
+                // Essayer d'appeler l'endpoint de refresh s'il existe
                 const response = await fetch(`${BACKEND_URL}/api/refresh`, {
                     method: 'POST',
                     mode: 'cors',
@@ -1127,7 +1128,7 @@
                 
             } catch (error) {
                 console.error('❌ Force refresh failed:', error);
-                updateStatus('🔴 Refresh failed', false);
+                updateStatus('🔄 Refreshing data...', false);
                 
                 // Fallback: rechargement normal
                 setTimeout(() => {
@@ -1169,77 +1170,11 @@
             return /^[A-Z0-9]+$/.test(symbol) && symbol.length >= 2 && symbol.length <= 10;
         }
 
-        // Améliorer la fonction addCrypto avec validation
-        async function addCrypto() {
-            const input = document.getElementById('crypto-input');
-            const symbol = input.value.trim().toUpperCase();
-
-            if (!symbol) {
-                alert('Please enter a symbol');
-                return;
-            }
-
-            if (!isValidSymbol(symbol)) {
-                alert('Invalid symbol format. Use only letters and numbers (2-10 characters)');
-                return;
-            }
-
-            if (trackedSymbols.includes(symbol)) {
-                alert('Symbol already tracked');
-                return;
-            }
-
-            // Optionnel: Tester si le symbole existe avant de l'ajouter
-            updateStatus('🔍 Validating symbol...', false);
-            
-            try {
-                const testData = await getCurrentRate(symbol);
-                
-                if (testData && testData.status === 'success' && testData.exchanges) {
-                    // Vérifier qu'au moins un exchange a des données pour ce symbole
-                    const hasData = Object.values(testData.exchanges).some(ex => ex.status === 'success');
-                    
-                    if (!hasData) {
-                        alert(`Symbol ${symbol} not found on any exchange. Please check the symbol name.`);
-                        updateStatus('🟡 Symbol validation failed', false);
-                        return;
-                    }
-                    
-                    // Symbole valide, l'ajouter
-                    trackedSymbols.push(symbol);
-                    saveTrackedSymbols();
-                    updateTrackedSymbolsDisplay();
-                    input.value = '';
-                    
-                    updateStatus('✅ Symbol added successfully', true);
-                    
-                    // Recharger les données pour inclure le nouveau symbole
-                    setTimeout(() => {
-                        loadData();
-                    }, 1000);
-                    
-                } else {
-                    alert(`Symbol ${symbol} not found. Please check the symbol name.`);
-                    updateStatus('🟡 Symbol not found', false);
-                }
-                
-            } catch (error) {
-                console.warn('❌ Symbol validation failed:', error);
-                // Ajouter quand même le symbole (le backend pourrait être temporairement indisponible)
-                trackedSymbols.push(symbol);
-                saveTrackedSymbols();
-                updateTrackedSymbolsDisplay();
-                input.value = '';
-                
-                alert(`Symbol ${symbol} added, but validation failed. It will be checked when data is refreshed.`);
-                loadData();
-            }
-        }
-
         // Fonction pour exporter les données
         function exportData() {
             const exportData = {
                 timestamp: new Date().toISOString(),
+                backend_url: BACKEND_URL,
                 tracked_symbols: trackedSymbols,
                 funding_rates: fundingRatesData,
                 arbitrage_opportunities: arbitrageData
@@ -1250,7 +1185,7 @@
             
             const link = document.createElement('a');
             link.href = URL.createObjectURL(dataBlob);
-            link.download = `funding-rates-${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `funding-rates-pythonanywhere-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
         }
 
@@ -1267,25 +1202,18 @@
             // Bouton de test des exchanges
             const testBtn = document.createElement('button');
             testBtn.className = 'refresh-btn';
-            testBtn.innerHTML = '🧪 Test Exchanges';
+            testBtn.innerHTML = '🧪 Test';
             testBtn.onclick = testExchanges;
-            
-            // Bouton de force refresh
-            const forceBtn = document.createElement('button');
-            forceBtn.className = 'refresh-btn';
-            forceBtn.innerHTML = '⚡ Force Refresh';
-            forceBtn.onclick = forceRefresh;
             
             statusBar.appendChild(exportBtn);
             statusBar.appendChild(testBtn);
-            statusBar.appendChild(forceBtn);
         }
 
         // Initialisation au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Funding Rates Monitor - Direct Exchanges Mode');
-            console.log('📊 Backend URL:', BACKEND_URL);
-            console.log('🔗 Pour que l\'application fonctionne, assurez-vous que le backend Flask est démarré sur le port 5000');
+            console.log('🚀 Funding Rates Monitor - PythonAnywhere Edition');
+            console.log('🔗 Backend URL:', BACKEND_URL);
+            console.log('📊 Tracked symbols:', trackedSymbols);
             
             // Charger les symboles sauvegardés
             loadTrackedSymbols();
@@ -1293,21 +1221,15 @@
             // Ajouter les boutons utilitaires
             addUtilityButtons();
             
-            // Modifier le bouton refresh existant pour utiliser forceRefresh
-            const refreshBtn = document.getElementById('refresh-btn');
-            refreshBtn.onclick = forceRefresh;
-            
             // Initialiser l'interface
-            updateStatus('🔄 Initializing...', false);
+            updateStatus('🔄 Initializing PythonAnywhere connection...', false);
             
             // Charger les données avec délai pour permettre au backend de démarrer
             setTimeout(() => {
                 loadData();
             }, 1000);
             
-            console.log('✅ Application initialized');
-            console.log('📈 Tracked symbols:', trackedSymbols);
-            console.log('💡 Si vous voyez des erreurs de connexion, vérifiez que le backend Python est démarré avec: python app.py');
+            console.log('✅ Application initialized with PythonAnywhere backend');
         });
 
         // Gestion des erreurs globales
@@ -1319,7 +1241,7 @@
         // Gestion de la reconnexion réseau
         window.addEventListener('online', function() {
             console.log('🌐 Network reconnected');
-            updateStatus('🔄 Reconnecting...', false);
+            updateStatus('🔄 Reconnecting to PythonAnywhere...', false);
             setTimeout(() => {
                 loadData();
             }, 1000);
@@ -1331,6 +1253,4 @@
         });
     </script>
 </body>
-</html> item.signal.includes('BIENTÔT')) {
-                    signalClass += 'signal-soon';
-                } else if (item.signal &&
+</html>
