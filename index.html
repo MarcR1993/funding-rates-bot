@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funding Rates Monitor</title>
+    <title>Funding Rates Monitor - Direct Exchanges</title>
     <style>
         * {
             margin: 0;
@@ -88,6 +88,90 @@
         .refresh-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .add-crypto-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .add-crypto-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .crypto-input {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            min-width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        .crypto-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .tracked-symbols {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .symbol-tag {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remove-symbol {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .section {
@@ -251,6 +335,33 @@
             font-size: 12px;
         }
 
+        .exchange-status {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .exchange-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .exchange-badge.online {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .exchange-badge.offline {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -281,17 +392,69 @@
                 padding: 10px 8px;
                 font-size: 12px;
             }
+
+            .add-crypto-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .crypto-input {
+                min-width: auto;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>💰 Funding Rates Monitor</h1>
+            <h1>💰 Funding Rates Monitor - Direct Exchanges</h1>
             <div class="status-bar">
                 <div id="connection-status" class="status disconnected">Connecting...</div>
                 <div id="last-update" class="last-update">Never</div>
                 <button id="refresh-btn" class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- Section d'ajout de cryptos -->
+        <div class="add-crypto-section">
+            <h3 style="margin-bottom: 15px; color: #2c3e50;">📈 Add Cryptocurrency to Track</h3>
+            <div class="add-crypto-form">
+                <input 
+                    type="text" 
+                    id="crypto-input" 
+                    class="crypto-input" 
+                    placeholder="Enter symbol (e.g., BTC)"
+                    maxlength="10"
+                >
+                <button onclick="addCrypto()" class="add-btn">➕ Add Symbol</button>
+                <span style="color: #666; font-size: 12px;">
+                    Direct APIs: Binance, KuCoin, Bybit, OKX<br>
+                    <small style="color: #999;">⚠️ Symbols reset on page reload (session only)</small>
+                </span>
+            </div>
+            <div class="tracked-symbols" id="tracked-symbols">
+                <!-- Les symboles trackés seront affichés ici -->
+            </div>
+        </div>
+
+        <!-- Status des exchanges -->
+        <div class="section">
+            <div class="section-header">
+                <h2>🔗 Exchange Status</h2>
+            </div>
+            <div class="exchange-status" id="exchange-status">
+                <div class="exchange-badge offline">
+                    <span>🟡</span> Binance: Checking...
+                </div>
+                <div class="exchange-badge offline">
+                    <span>🟡</span> KuCoin: Checking...
+                </div>
+                <div class="exchange-badge offline">
+                    <span>🟡</span> Bybit: Checking...
+                </div>
+                <div class="exchange-badge offline">
+                    <span>🟡</span> OKX: Checking...
+                </div>
             </div>
         </div>
 
@@ -303,6 +466,7 @@
                         <span><span class="legend-dot" style="background: #f39c12;"></span> Binance</span>
                         <span><span class="legend-dot" style="background: #2ecc71;"></span> KuCoin</span>
                         <span><span class="legend-dot" style="background: #3498db;"></span> Bybit</span>
+                        <span><span class="legend-dot" style="background: #9b59b6;"></span> OKX</span>
                     </div>
                 </div>
                 <div class="table-container">
@@ -313,10 +477,11 @@
                                 <th>Binance</th>
                                 <th>KuCoin</th>
                                 <th>Bybit</th>
+                                <th>OKX</th>
                             </tr>
                         </thead>
                         <tbody id="funding-rates-body">
-                            <tr><td colspan="4" class="loading">Loading funding rates...</td></tr>
+                            <tr><td colspan="5" class="loading">Loading funding rates...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -357,16 +522,171 @@
     </div>
 
     <script>
-        // Configuration
-        const BACKEND_URL = 'https://funding-rates-backend-l7mj.onrender.com';
+        // Configuration - Choisissez votre URL backend
+        const BACKEND_CONFIGS = {
+            local: 'http://localhost:5000',
+            heroku: 'https://your-app.herokuapp.com',
+            render: 'https://your-app.onrender.com',
+            railway: 'https://your-app.up.railway.app'
+        };
+        
+        // Changez ici pour utiliser un autre backend
+        const BACKEND_URL = BACKEND_CONFIGS.local; // Changez en .heroku, .render, etc.
+        
         let fundingRatesData = [];
         let arbitrageData = [];
+        let trackedSymbols = ['BTC', 'ETH', 'SOL', 'XRP', 'DOGE', 'ADA', 'AVAX', 'MATIC', 'LINK', 'DOT']; // Symboles par défaut
+        let connectionRetries = 0;
+        const MAX_RETRIES = 3;
 
-        // Status de connexion
-        function updateStatus(message, isConnected) {
+        // Note importante sur la sauvegarde
+        console.log('ℹ️ Note: Dans cet environnement, les symboles ajoutés seront conservés uniquement pendant cette session.');
+        console.log('🔗 Tentative de connexion au backend:', BACKEND_URL);
+        console.log('💡 Backends disponibles:', Object.keys(BACKEND_CONFIGS));
+
+        // Charger les symboles sauvegardés (en mémoire seulement)
+        function loadTrackedSymbols() {
+            // Note: localStorage n'est pas disponible dans certains environnements
+            // Les symboles seront sauvegardés seulement pendant la session
+            updateTrackedSymbolsDisplay();
+        }
+
+        // Sauvegarder les symboles (en mémoire seulement)
+        function saveTrackedSymbols() {
+            // Note: Sauvegarde en mémoire uniquement pour cette session
+            console.log('💾 Symbols saved in memory:', trackedSymbols);
+        }
+
+        // Mettre à jour l'affichage des symboles trackés
+        function updateTrackedSymbolsDisplay() {
+            const container = document.getElementById('tracked-symbols');
+            container.innerHTML = trackedSymbols.map(symbol => `
+                <div class="symbol-tag">
+                    ${symbol}
+                    <button class="remove-symbol" onclick="removeSymbol('${symbol}')">×</button>
+                </div>
+            `).join('');
+        }
+
+        // Ajouter un nouveau symbole
+        function addCrypto() {
+            const input = document.getElementById('crypto-input');
+            const symbol = input.value.trim().toUpperCase();
+
+            if (!symbol) {
+                alert('Please enter a symbol');
+                return;
+            }
+
+            if (symbol.length > 10) {
+                alert('Symbol too long (max 10 characters)');
+                return;
+            }
+
+            if (trackedSymbols.includes(symbol)) {
+                alert('Symbol already tracked');
+                return;
+            }
+
+            trackedSymbols.push(symbol);
+            saveTrackedSymbols();
+            updateTrackedSymbolsDisplay();
+            input.value = '';
+
+            // Recharger les données pour inclure le nouveau symbole
+            loadData();
+        }
+
+        // Supprimer un symbole
+        function removeSymbol(symbol) {
+            trackedSymbols = trackedSymbols.filter(s => s !== symbol);
+            saveTrackedSymbols();
+            updateTrackedSymbolsDisplay();
+            
+            // Recharger les données
+            loadData();
+        }
+
+        // Écouter la touche Entrée dans l'input
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('crypto-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCrypto();
+                }
+            });
+        });
+
+        // Status de connexion amélioré
+        function updateStatus(message, isConnected, showRetry = false) {
             const statusElement = document.getElementById('connection-status');
             statusElement.textContent = message;
             statusElement.className = isConnected ? 'status connected' : 'status disconnected';
+            
+            if (showRetry && connectionRetries < MAX_RETRIES) {
+                statusElement.textContent += ` (Retry ${connectionRetries + 1}/${MAX_RETRIES})`;
+            }
+        }
+
+        // Fonction de test de connectivité backend
+        async function testBackendConnectivity() {
+            try {
+                updateStatus('🔍 Testing backend connectivity...', false);
+                
+                const response = await fetch(`${BACKEND_URL}/health`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'omit',
+                    signal: AbortSignal.timeout(5000) // Timeout 5 secondes
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateStatus('✅ Backend connected', true);
+                    console.log('✅ Backend health check passed:', data);
+                    connectionRetries = 0;
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('❌ Backend connectivity test failed:', error);
+                
+                connectionRetries++;
+                
+                if (error.name === 'TimeoutError') {
+                    updateStatus('🔴 Backend timeout', false, true);
+                } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    updateStatus('🔴 Backend not running', false, true);
+                } else {
+                    updateStatus(`🔴 Backend error: ${error.message}`, false, true);
+                }
+                
+                return false;
+            }
+        }
+
+        // Mettre à jour le statut des exchanges
+        function updateExchangeStatus(exchangeStatus) {
+            const container = document.getElementById('exchange-status');
+            const exchanges = ['binance', 'kucoin', 'bybit', 'okx'];
+            
+            container.innerHTML = exchanges.map(exchange => {
+                const status = exchangeStatus[exchange] || { status: 'unknown' };
+                const isOnline = status.status === 'success';
+                const badgeClass = isOnline ? 'online' : 'offline';
+                const icon = isOnline ? '🟢' : '🔴';
+                const count = status.count || 0;
+                
+                return `
+                    <div class="exchange-badge ${badgeClass}">
+                        <span>${icon}</span> 
+                        ${exchange.charAt(0).toUpperCase() + exchange.slice(1)}: 
+                        ${isOnline ? `${count} rates` : 'Offline'}
+                    </div>
+                `;
+            }).join('');
         }
 
         // Formatage des taux
@@ -396,42 +716,56 @@
             console.log('📊 Processing backend data:', dataArray.length, 'items');
             
             dataArray.forEach(item => {
-                const symbol = item.symbol;
+                const baseSymbol = item.base_symbol || item.symbol?.split('/')[0];
                 const exchange = item.exchange.toLowerCase();
                 const rate = parseFloat(item.fundingRate);
                 
-                if (!grouped[symbol]) {
-                    grouped[symbol] = {
-                        symbol: symbol,
+                if (!baseSymbol) return;
+
+                // Filtrer seulement les symboles que nous trackons
+                if (!trackedSymbols.includes(baseSymbol.toUpperCase())) return;
+                
+                if (!grouped[baseSymbol]) {
+                    grouped[baseSymbol] = {
+                        symbol: baseSymbol,
                         binance: null,
                         kucoin: null,
-                        bybit: null
+                        bybit: null,
+                        okx: null
                     };
                 }
                 
-                // Mapper les noms d'exchanges (seulement 3)
+                // Mapper les exchanges
                 const exchangeMap = {
                     'binance': 'binance',
                     'kucoin': 'kucoin',
-                    'bybit': 'bybit'
+                    'bybit': 'bybit',
+                    'okx': 'okx'
                 };
                 
                 const mappedExchange = exchangeMap[exchange];
-                if (mappedExchange) {
-                    grouped[symbol][mappedExchange] = rate;
+                if (mappedExchange && grouped[baseSymbol]) {
+                    grouped[baseSymbol][mappedExchange] = rate;
                 }
             });
             
             const result = Object.values(grouped);
             console.log('✅ Processed into', result.length, 'symbols');
-            console.log('📊 Sample data:', result[0]);
             
             return result;
         }
 
-        // Fonction pour récupérer les données - VERSION SIMPLIFIÉE
+        // Fonction pour récupérer les données avec retry
         async function fetchFundingRates() {
             try {
+                // Test de connectivité d'abord
+                const isBackendReady = await testBackendConnectivity();
+                if (!isBackendReady) {
+                    // Afficher des données d'exemple si le backend n'est pas disponible
+                    showExampleData();
+                    return;
+                }
+                
                 updateStatus('🔄 Fetching live data...', false);
                 
                 const fullUrl = `${BACKEND_URL}/api/funding-rates`;
@@ -444,7 +778,8 @@
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
                     },
-                    credentials: 'omit'
+                    credentials: 'omit',
+                    signal: AbortSignal.timeout(10000) // Timeout 10 secondes
                 });
                 
                 console.log(`📡 Response status: ${response.status}`);
@@ -459,22 +794,22 @@
                 if (responseData.status !== 'success') {
                     throw new Error(`Backend error: ${responseData.message || 'Unknown error'}`);
                 }
+
+                // Mettre à jour le statut des exchanges
+                if (responseData.exchange_status) {
+                    updateExchangeStatus(responseData.exchange_status);
+                }
                 
                 if (!responseData.data || responseData.data.length === 0) {
                     console.warn('⚠️ Backend returned empty data');
                     updateStatus('🟡 No data available yet', false);
+                    showExampleData();
                     return;
                 }
                 
                 // Traiter les données du backend
                 console.log(`📊 Processing ${responseData.data.length} raw items from backend`);
                 fundingRatesData = processBackendData(responseData.data);
-                
-                if (fundingRatesData.length === 0) {
-                    console.warn('⚠️ No symbols after processing');
-                    updateStatus('🟡 Data processing issue', false);
-                    return;
-                }
                 
                 updateStatus(`🟢 Live: ${fundingRatesData.length} symbols`, true);
                 
@@ -487,14 +822,61 @@
                 console.error('❌ Failed to fetch data:', error);
                 
                 let errorMessage = 'Connection Failed';
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                if (error.name === 'TimeoutError') {
+                    errorMessage = 'Backend Timeout';
+                } else if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
                     errorMessage = 'Backend Offline';
                 } else if (error.message.includes('HTTP')) {
                     errorMessage = `Backend Error: ${error.message}`;
                 }
                 
                 updateStatus(`🔴 ${errorMessage}`, false);
+                
+                // Afficher des données d'exemple en cas d'erreur
+                showExampleData();
             }
+        }
+
+        // Afficher des données d'exemple quand le backend n'est pas disponible
+        function showExampleData() {
+            console.log('📝 Showing example data (backend not available)');
+            
+            // Données d'exemple pour démonstration
+            fundingRatesData = [
+                { symbol: 'BTC', binance: 0.0001, kucoin: 0.0002, bybit: 0.0001, okx: 0.0003 },
+                { symbol: 'ETH', binance: -0.0001, kucoin: 0.0001, bybit: 0.0000, okx: 0.0002 },
+                { symbol: 'SOL', binance: 0.0005, kucoin: 0.0004, bybit: 0.0006, okx: 0.0005 },
+                { symbol: 'XRP', binance: 0.0002, kucoin: 0.0003, bybit: 0.0001, okx: 0.0004 },
+                { symbol: 'DOGE', binance: 0.0001, kucoin: 0.0002, bybit: 0.0001, okx: 0.0001 }
+            ];
+            
+            arbitrageData = [
+                {
+                    symbol: 'BTC',
+                    strategy: 'Long/Short',
+                    longExchange: 'binance',
+                    shortExchange: 'okx',
+                    longRate: 0.0001,
+                    shortRate: 0.0003,
+                    divergence_pct: 0.02,
+                    revenue_8h_pct: 0.012,
+                    revenue_annual_pct: 15.8,
+                    signal: '🟢 ENTRER MAINTENANT',
+                    signal_detail: 'Position optimale - 2h30m avant funding'
+                }
+            ];
+            
+            updateStatus('📝 Example Data (Backend Offline)', false);
+            renderFundingRatesTable();
+            renderArbitrageTable();
+            
+            // Mettre à jour le statut des exchanges en mode exemple
+            updateExchangeStatus({
+                binance: { status: 'unknown' },
+                kucoin: { status: 'unknown' },
+                bybit: { status: 'unknown' },
+                okx: { status: 'unknown' }
+            });
         }
 
         // Mise à jour du timer de funding
@@ -525,20 +907,12 @@
             console.log('🎨 Rendering table with', fundingRatesData.length, 'symbols');
             
             if (fundingRatesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="loading">No data available - Check console for details</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">No data available for tracked symbols</td></tr>';
                 return;
             }
             
             const rows = fundingRatesData.map((item, index) => {
-                const cleanSymbol = item.symbol ? item.symbol.split('/')[0] : `Symbol_${index}`;
-                
-                // Debug chaque ligne
-                console.log(`📊 Row ${index} - ${cleanSymbol}:`, {
-                    symbol: item.symbol,
-                    binance: typeof item.binance + ' = ' + item.binance,
-                    kucoin: typeof item.kucoin + ' = ' + item.kucoin,
-                    bybit: typeof item.bybit + ' = ' + item.bybit
-                });
+                const cleanSymbol = item.symbol || `Symbol_${index}`;
                 
                 return `
                     <tr>
@@ -546,13 +920,14 @@
                         <td class="${getRateClass(item.binance)}">${formatRate(item.binance)}</td>
                         <td class="${getRateClass(item.kucoin)}">${formatRate(item.kucoin)}</td>
                         <td class="${getRateClass(item.bybit)}">${formatRate(item.bybit)}</td>
+                        <td class="${getRateClass(item.okx)}">${formatRate(item.okx)}</td>
                     </tr>
                 `;
             }).join('');
             
             tbody.innerHTML = rows;
             updateLastUpdateTime();
-            console.log('✅ Table rendered successfully with', rows.split('<tr>').length - 1, 'rows');
+            console.log('✅ Table rendered successfully');
         }
 
         // Fonction pour récupérer les opportunités d'arbitrage
@@ -594,8 +969,6 @@
                 
             } catch (error) {
                 console.error('❌ Failed to fetch arbitrage data:', error);
-                
-                // Pas de fallback - juste afficher qu'il n'y a pas de données
                 arbitrageData = [];
                 renderArbitrageTable();
             }
@@ -615,8 +988,6 @@
                 let signalClass = 'signal-cell ';
                 if (item.signal && item.signal.includes('ENTRER MAINTENANT')) {
                     signalClass += 'signal-enter';
-                } else if (item.signal && item.signal.includes('BIENTÔT')) {
-                    signalClass += 'signal-soon';
                 } else if (item.signal && item.signal.includes('SORTIR')) {
                     signalClass += 'signal-exit';
                 } else {
@@ -643,9 +1014,36 @@
             tbody.innerHTML = rows;
         }
 
+        // Test de connectivité des exchanges
+        async function testExchanges() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/test-exchanges`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.results && data.results.exchanges) {
+                        updateExchangeStatus(data.results.exchanges);
+                    }
+                }
+            } catch (error) {
+                console.warn('❌ Exchange test failed:', error);
+            }
+        }
+
         // Fonction principale pour charger toutes les données
         async function loadData() {
             await fetchFundingRates();
+            
+            // Tester les exchanges en arrière-plan
+            testExchanges();
             
             // Démarrer le timer de mise à jour du funding
             setInterval(() => {
@@ -655,6 +1053,9 @@
                     .then(data => {
                         if (data.next_funding) {
                             updateFundingTimer(data.next_funding);
+                        }
+                        if (data.exchange_status) {
+                            updateExchangeStatus(data.exchange_status);
                         }
                     })
                     .catch(() => {}); // Ignore les erreurs silencieusement
@@ -690,19 +1091,246 @@
                 }
             }, 1000); // Chaque seconde
             
-            // Auto-refresh toutes les 3 minutes
+            // Auto-refresh toutes les 2 minutes
             setInterval(() => {
                 console.log('🔄 Auto-refresh...');
                 fetchFundingRates();
-            }, 180000); // 3 minutes
+            }, 120000); // 2 minutes
+        }
+
+        // Fonction pour forcer une mise à jour
+        async function forceRefresh() {
+            try {
+                updateStatus('🔄 Force refreshing...', false);
+                
+                const response = await fetch(`${BACKEND_URL}/api/refresh`, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('✅ Force refresh successful:', data);
+                    
+                    // Recharger les données après le refresh
+                    setTimeout(() => {
+                        loadData();
+                    }, 2000);
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('❌ Force refresh failed:', error);
+                updateStatus('🔴 Refresh failed', false);
+                
+                // Fallback: rechargement normal
+                setTimeout(() => {
+                    loadData();
+                }, 1000);
+            }
+        }
+
+        // Fonction pour obtenir le taux actuel d'un symbole spécifique
+        async function getCurrentRate(symbol) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/funding-rate/${symbol}/current`, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'omit'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`📊 Current rate for ${symbol}:`, data);
+                    return data;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                console.error(`❌ Failed to get current rate for ${symbol}:`, error);
+                return null;
+            }
+        }
+
+        // Fonction utilitaire pour valider un symbole
+        function isValidSymbol(symbol) {
+            // Vérifier que le symbole ne contient que des lettres et des chiffres
+            return /^[A-Z0-9]+$/.test(symbol) && symbol.length >= 2 && symbol.length <= 10;
+        }
+
+        // Améliorer la fonction addCrypto avec validation
+        async function addCrypto() {
+            const input = document.getElementById('crypto-input');
+            const symbol = input.value.trim().toUpperCase();
+
+            if (!symbol) {
+                alert('Please enter a symbol');
+                return;
+            }
+
+            if (!isValidSymbol(symbol)) {
+                alert('Invalid symbol format. Use only letters and numbers (2-10 characters)');
+                return;
+            }
+
+            if (trackedSymbols.includes(symbol)) {
+                alert('Symbol already tracked');
+                return;
+            }
+
+            // Optionnel: Tester si le symbole existe avant de l'ajouter
+            updateStatus('🔍 Validating symbol...', false);
+            
+            try {
+                const testData = await getCurrentRate(symbol);
+                
+                if (testData && testData.status === 'success' && testData.exchanges) {
+                    // Vérifier qu'au moins un exchange a des données pour ce symbole
+                    const hasData = Object.values(testData.exchanges).some(ex => ex.status === 'success');
+                    
+                    if (!hasData) {
+                        alert(`Symbol ${symbol} not found on any exchange. Please check the symbol name.`);
+                        updateStatus('🟡 Symbol validation failed', false);
+                        return;
+                    }
+                    
+                    // Symbole valide, l'ajouter
+                    trackedSymbols.push(symbol);
+                    saveTrackedSymbols();
+                    updateTrackedSymbolsDisplay();
+                    input.value = '';
+                    
+                    updateStatus('✅ Symbol added successfully', true);
+                    
+                    // Recharger les données pour inclure le nouveau symbole
+                    setTimeout(() => {
+                        loadData();
+                    }, 1000);
+                    
+                } else {
+                    alert(`Symbol ${symbol} not found. Please check the symbol name.`);
+                    updateStatus('🟡 Symbol not found', false);
+                }
+                
+            } catch (error) {
+                console.warn('❌ Symbol validation failed:', error);
+                // Ajouter quand même le symbole (le backend pourrait être temporairement indisponible)
+                trackedSymbols.push(symbol);
+                saveTrackedSymbols();
+                updateTrackedSymbolsDisplay();
+                input.value = '';
+                
+                alert(`Symbol ${symbol} added, but validation failed. It will be checked when data is refreshed.`);
+                loadData();
+            }
+        }
+
+        // Fonction pour exporter les données
+        function exportData() {
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                tracked_symbols: trackedSymbols,
+                funding_rates: fundingRatesData,
+                arbitrage_opportunities: arbitrageData
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `funding-rates-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // Ajouter des boutons d'export et de test dans le header
+        function addUtilityButtons() {
+            const statusBar = document.querySelector('.status-bar');
+            
+            // Bouton d'export
+            const exportBtn = document.createElement('button');
+            exportBtn.className = 'refresh-btn';
+            exportBtn.innerHTML = '💾 Export';
+            exportBtn.onclick = exportData;
+            
+            // Bouton de test des exchanges
+            const testBtn = document.createElement('button');
+            testBtn.className = 'refresh-btn';
+            testBtn.innerHTML = '🧪 Test Exchanges';
+            testBtn.onclick = testExchanges;
+            
+            // Bouton de force refresh
+            const forceBtn = document.createElement('button');
+            forceBtn.className = 'refresh-btn';
+            forceBtn.innerHTML = '⚡ Force Refresh';
+            forceBtn.onclick = forceRefresh;
+            
+            statusBar.appendChild(exportBtn);
+            statusBar.appendChild(testBtn);
+            statusBar.appendChild(forceBtn);
         }
 
         // Initialisation au chargement de la page
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Funding Rates Monitor - Live Mode Only');
+            console.log('🚀 Funding Rates Monitor - Direct Exchanges Mode');
+            console.log('📊 Backend URL:', BACKEND_URL);
+            console.log('🔗 Pour que l\'application fonctionne, assurez-vous que le backend Flask est démarré sur le port 5000');
+            
+            // Charger les symboles sauvegardés
+            loadTrackedSymbols();
+            
+            // Ajouter les boutons utilitaires
+            addUtilityButtons();
+            
+            // Modifier le bouton refresh existant pour utiliser forceRefresh
+            const refreshBtn = document.getElementById('refresh-btn');
+            refreshBtn.onclick = forceRefresh;
+            
+            // Initialiser l'interface
             updateStatus('🔄 Initializing...', false);
-            loadData();
+            
+            // Charger les données avec délai pour permettre au backend de démarrer
+            setTimeout(() => {
+                loadData();
+            }, 1000);
+            
+            console.log('✅ Application initialized');
+            console.log('📈 Tracked symbols:', trackedSymbols);
+            console.log('💡 Si vous voyez des erreurs de connexion, vérifiez que le backend Python est démarré avec: python app.py');
+        });
+
+        // Gestion des erreurs globales
+        window.addEventListener('error', function(e) {
+            console.error('🚨 Global error:', e.error);
+            updateStatus('🔴 Application error', false);
+        });
+
+        // Gestion de la reconnexion réseau
+        window.addEventListener('online', function() {
+            console.log('🌐 Network reconnected');
+            updateStatus('🔄 Reconnecting...', false);
+            setTimeout(() => {
+                loadData();
+            }, 1000);
+        });
+
+        window.addEventListener('offline', function() {
+            console.log('📵 Network disconnected');
+            updateStatus('🔴 Offline', false);
         });
     </script>
 </body>
-</html>
+</html> item.signal.includes('BIENTÔT')) {
+                    signalClass += 'signal-soon';
+                } else if (item.signal &&
